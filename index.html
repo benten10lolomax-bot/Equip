@@ -573,7 +573,17 @@
 <!-- HIDDEN HTML5 QR DECODER CONTAINER FOR FILE UPLOAD SCANNING -->
 <div id="hiddenQrContainer" style="display:none;"></div>
 
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+   const SUPABASE_URL = 'https://ujkskvlwuqmmdgalzxkm.supabase.co';
+
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_fCuB5FYS_2w47LcgUzOOcg_upDV4lqD';
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
     const titles = {
         dashboard: "Dashboard",
         inventory: "Equipment Inventory",
