@@ -218,24 +218,36 @@
         <h1>E-QUIP</h1>
         <p class="subtitle">School Equipment Borrowing and Inventory System</p>
         <form id="loginForm">
-            <div class="form-group">
-                <label>Email / Username</label>
-                <input id="loginUser" type="text" placeholder="Enter your username" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <div style="position:relative"><input id="loginPass" type="password" placeholder="Enter your password" required style="padding-right:65px"><button type="button" onclick="toggleLoginPassword()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#2563eb;font-weight:700;cursor:pointer">Show</button></div>
-            </div>
-            <div class="form-group">
-                <label>Role</label>
-                <select id="loginRole">
-                    <option>Administrator</option>
-                    <option>Inventory / Maintenance Staff</option>
-                    <option>Faculty / Staff / Student</option>
-                </select>
-            </div>
-            <button class="primary-btn" type="submit">Sign In</button>
-        </form>
+    <div class="form-group">
+        <label>Email</label>
+        <input
+            id="loginUser"
+            type="email"
+            placeholder="Enter your email"
+            required
+        >
+    </div>
+
+    <div class="form-group">
+        <label>Password</label>
+        <div style="position:relative">
+            <input
+                id="loginPass"
+                type="password"
+                placeholder="Enter your password"
+                required
+                style="padding-right:65px"
+            >
+            <button
+                type="button"
+                onclick="toggleLoginPassword()"
+                style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#2563eb;font-weight:700;cursor:pointer"
+            >Show</button>
+        </div>
+    </div>
+
+    <button class="primary-btn" type="submit">Sign In</button>
+</form>
         <p class="register-link" onclick="openRegister()">Create Account</p>
     </div>
 </div>
@@ -541,10 +553,10 @@
             <div class="form-group"><label>Username</label><input id="regUser" type="text" placeholder="Choose username" required></div>
             <div class="form-group"><label>Role</label>
                 <select id="regRole" required>
-                    <option>Administrator</option>
-                    <option>Inventory / Maintenance Staff</option>
-                    <option>Faculty / Staff / Student</option>
-                </select>
+    <option value="Faculty / Staff / Student">
+        Faculty / Staff / Student
+    </option>
+</select>
             </div>
             <div class="form-group"><label>Password</label><input id="regPass" type="password" minlength="6" placeholder="At least 6 characters" required></div>
             <div class="form-group"><label>Confirm Password</label><input id="regConfirm" type="password" minlength="6" placeholder="Confirm password" required></div>
