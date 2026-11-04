@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-QUIP | School Equipment Borrowing and Inventory System</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --navy: #123b5d;
+        --blue: #1e5f8f;
+        --light-blue: #eaf3f9;
+        --bg: #f4f7fa;
+        --white: #fff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --border: #dce3e9;
+        --green: #198754;
+        --orange: #e08b16;
+        --red: #dc3545;
+        --shadow: 0 8px 25px rgba(18,59,93,.08);
+    }
+    body { font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    /* Login */
+    #loginPage {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #123b5d, #2d729f);
+    }
+    .login-card {
+        width: min(420px, 100%);
+        background: white;
+        padding: 38px;
+        border-radius: 18px;
+        box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .logo-box {
+        width: 62px; height: 62px; border-radius: 14px;
+        background: var(--navy); color: white;
+        display: grid; place-items: center;
+        font-size: 24px; font-weight: bold;
+        margin: 0 auto 15px;
+    }
+    .login-card h1 { text-align: center; color: var(--navy); }
+    .login-card .subtitle { text-align: center; color: var(--muted); margin: 7px 0 28px; font-size: 14px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 700; }
+    input, select {
+        width: 100%; border: 1px solid var(--border);
+        border-radius: 9px; padding: 12px 13px; outline: none;
+        background: white;
+    }
+    input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30,95,143,.1); }
+    .primary-btn {
+        width: 100%; border: 0; border-radius: 9px; padding: 13px;
+        background: var(--navy); color: white; font-weight: bold;
+    }
+    .primary-btn:hover { background: var(--blue); }
+
+    /* App */
+    #app { display: none; min-height: 100vh; }
+    .sidebar {
+        position: fixed; left: 0; top: 0; bottom: 0;
+        width: 250px; background: var(--navy); color: white;
+        padding: 22px 15px; z-index: 20;
+        overflow-y: auto;
+    }
+    .brand { padding: 5px 10px 25px; }
+    .brand strong { display: block; font-size: 24px; }
+    .brand span { font-size: 11px; opacity: .75; line-height: 1.4; }
+    .nav-title { font-size: 10px; opacity: .55; padding: 12px 12px 7px; text-transform: uppercase; letter-spacing: 1px; }
+    .nav-item {
+        width: 100%; border: 0; background: transparent; color: #dceaf3;
+        padding: 11px 12px; border-radius: 8px; text-align: left;
+        margin: 2px 0; display: flex; align-items: center; gap: 11px;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,.13); color: white; }
+    .logout { margin-top: 18px; border-top: 1px solid rgba(255,255,255,.12); padding-top: 15px; }
+
+    .main { margin-left: 250px; min-height: 100vh; }
+    .topbar {
+        height: 70px; background: white; border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 30px; position: sticky; top: 0; z-index: 10;
+    }
+    .page-title { font-size: 20px; font-weight: 700; }
+    .profile { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--light-blue); color: var(--navy); display: grid; place-items: center; font-weight: bold; }
+    .profile small { display: block; color: var(--muted); }
+    .content { padding: 30px; max-width: 1500px; margin: auto; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+    .welcome {
+        background: linear-gradient(120deg, var(--navy), #286b98);
+        color: white; border-radius: 15px; padding: 25px; margin-bottom: 22px;
+    }
+    .welcome h2 { margin-bottom: 7px; }
+    .welcome p { opacity: .85; font-size: 14px; }
+
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 25px; }
+    .card {
+        background: white; border: 1px solid var(--border);
+        border-radius: 13px; padding: 20px; box-shadow: var(--shadow);
+    }
+    .stat { display: flex; justify-content: space-between; align-items: center; }
+    .stat .icon {
+        width: 44px; height: 44px; border-radius: 10px;
+        background: var(--light-blue); display: grid; place-items: center; font-size: 20px;
+    }
+    .stat h3 { font-size: 27px; margin-top: 7px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 17px; }
+    .card-header h3 { font-size: 16px; }
+    .btn {
+        border: 0; border-radius: 7px; padding: 9px 13px; font-size: 12px; font-weight: bold;
+        background: var(--navy); color: white;
+    }
+    .btn.secondary { background: #edf2f5; color: var(--navy); }
+    .btn.green { background: var(--green); }
+    .btn.red { background: var(--red); }
+    .btn.orange { background: var(--orange); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: 13px; }
+    th { background: #f7f9fb; color: #44515d; font-size: 11px; text-transform: uppercase; }
+    tr:hover td { background: #fafcfd; }
+    .badge { padding: 5px 9px; border-radius: 20px; font-size: 11px; font-weight: bold; display: inline-block; }
+    .available { color: #12633d; background: #e6f5ed; }
+    .borrowed { color: #7a4a00; background: #fff1d8; }
+    .maintenance { color: #8b1e28; background: #fde8ea; }
+    .pending { color: #765000; background: #fff4d6; }
+    .approved { color: #12633d; background: #e6f5ed; }
+    .overdue { color: #8b1e28; background: #fde8ea; }
+
+    .toolbar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .toolbar input { max-width: 300px; }
+    .toolbar select { max-width: 180px; }
+
+    .form-card { max-width: 850px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .full { grid-column: 1 / -1; }
+    textarea { width: 100%; min-height: 100px; border: 1px solid var(--border); border-radius: 9px; padding: 12px; resize: vertical; }
+
+    .qr-box {
+        width: 150px; height: 150px; border: 5px solid #111; margin: 15px auto;
+        display: grid; place-items: center; background:
+        linear-gradient(45deg,#111 25%,transparent 25%,transparent 75%,#111 75%),
+        linear-gradient(45deg,#111 25%,transparent 25%,transparent 75%,#111 75%);
+        background-size: 30px 30px; background-position: 0 0,15px 15px;
+        color: white; text-shadow: 0 0 3px #000; font-weight: bold;
+    }
+    .equipment-photo-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); background: #f3f5f7; }
+    .equipment-photo-placeholder { width: 44px; height: 44px; border-radius: 8px; border: 1px solid var(--border); display:grid; place-items:center; background:#f3f5f7; color:var(--muted); font-size:18px; }
+    .record-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9998; align-items:center; justify-content:center; padding:20px; }
+    .record-overlay.show { display:flex; }
+    .record-card { width:min(760px,100%); max-height:92vh; overflow:auto; background:#fff; border-radius:18px; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+    .record-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:20px; }
+    .record-head h2 { color:var(--navy); margin-bottom:4px; }
+    .record-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .record-field { border:1px solid var(--border); border-radius:10px; padding:12px; background:#fafcfd; }
+    .record-field.full { grid-column:1 / -1; }
+    .record-field label { display:block; font-size:11px; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:5px; }
+    .record-photo { width:100%; max-height:260px; object-fit:contain; border:1px solid var(--border); border-radius:12px; background:#f7f9fb; }
+    .record-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; flex-wrap:wrap; }
+
+    .toast {
+        position: fixed; right: 25px; bottom: 25px; background: #1f2937; color: white;
+        padding: 13px 17px; border-radius: 8px; display: none; z-index: 100;
+        box-shadow: 0 10px 30px rgba(0,0,0,.2);
+    }
+
+    @media (max-width: 1000px) {
+        .cards { grid-template-columns: repeat(2, 1fr); }
+        .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+        .sidebar { width: 70px; padding: 15px 8px; }
+        .brand strong { font-size: 0; }
+        .brand strong:after { content: "EQ"; font-size: 20px; }
+        .brand span, .nav-item span:not(.nav-icon), .nav-title { display: none; }
+        .nav-item { justify-content: center; }
+        .main { margin-left: 70px; }
+        .topbar { padding: 0 15px; }
+        .content { padding: 18px; }
+        .cards { grid-template-columns: 1fr; }
+        .form-grid { grid-template-columns: 1fr; }
+        .full { grid-column: auto; }
+        table { min-width: 750px; }
+        .table-wrap { overflow-x: auto; }
+    }
+
+    .register-link { text-align:center; margin-top:16px; color:var(--blue); font-weight:bold; cursor:pointer; }
+    .register-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; align-items:center; justify-content:center; padding:20px; }
+    .register-overlay.show { display:flex; }
+    .register-card { width:min(520px,100%); max-height:92vh; overflow:auto; background:#fff; border-radius:18px; padding:30px; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+    .register-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+    .register-head h2 { color:var(--navy); }
+    .close-register { border:0; background:#eef2f5; width:34px; height:34px; border-radius:50%; font-size:20px; }
+    .register-actions { display:flex; gap:10px; margin-top:18px; }
+    .register-actions button { flex:1; }
+</style>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage">
+    <div class="login-card">
+        <div class="logo-box">EQ</div>
+        <h1>E-QUIP</h1>
+        <p class="subtitle">School Equipment Borrowing and Inventory System</p>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email / Username</label>
+                <input id="loginUser" type="text" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <div style="position:relative"><input id="loginPass" type="password" placeholder="Enter your password" required style="padding-right:65px"><button type="button" onclick="toggleLoginPassword()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#2563eb;font-weight:700;cursor:pointer">Show</button></div>
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select id="loginRole">
+                    <option>Administrator</option>
+                    <option>Inventory / Maintenance Staff</option>
+                    <option>Faculty / Staff / Student</option>
+                </select>
+            </div>
+            <button class="primary-btn" type="submit">Sign In</button>
+        </form>
+        <p class="register-link" onclick="openRegister()">Create Account</p>
+    </div>
+</div>
+
+<!-- APPLICATION -->
+<div id="app">
+    <aside class="sidebar">
+        <div class="brand">
+            <strong>E-QUIP</strong>
+            <span>School Equipment Borrowing & Inventory System</span>
+        </div>
+
+        <div class="nav-title">Main</div>
+        <button class="nav-item active" data-section="dashboard"><span class="nav-icon">📊</span><span>Dashboard</span></button>
+        <button class="nav-item" data-section="inventory"><span class="nav-icon">📦</span><span>Equipment Inventory</span></button>
+        <button class="nav-item" data-section="qr"><span class="nav-icon">▦</span><span>QR Management</span></button>
+        <button class="nav-item" data-section="borrowing"><span class="nav-icon">📝</span><span>Borrowing Requests</span></button>
+        <button class="nav-item" data-section="transactions"><span class="nav-icon">↔</span><span>Transactions</span></button>
+
+        <div class="nav-title">Management</div>
+        <button class="nav-item" data-section="maintenance"><span class="nav-icon">🔧</span><span>Damage & Maintenance</span></button>
+        <button class="nav-item" data-section="reports"><span class="nav-icon">📄</span><span>Reports</span></button>
+        <button class="nav-item" data-section="notifications"><span class="nav-icon">🔔</span><span>Notifications</span></button>
+        <button class="nav-item" data-section="users"><span class="nav-icon">👥</span><span>User Management</span></button>
+        <button class="nav-item" data-section="settings"><span class="nav-icon">⚙</span><span>Settings</span></button>
+
+        <div class="logout">
+            <button class="nav-item" id="logoutBtn"><span class="nav-icon">↪</span><span>Logout</span></button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="page-title" id="pageTitle">Dashboard</div>
+            <div class="profile">
+                <div>
+                    <strong id="userDisplay">Administrator</strong>
+                    <small>System User</small>
+                </div>
+                <div class="avatar">AD</div>
+            </div>
+        </header>
+
+        <div class="content">
+
+            <!-- DASHBOARD -->
+            <section class="section active" id="dashboard">
+                <div class="welcome">
+                    <h2>Welcome to E-QUIP</h2>
+                    <p>Manage, borrow, track, and maintain school equipment in one centralized system.</p>
+                </div>
+
+                <div class="cards">
+                    <div class="card stat"><div><span class="muted">Total Equipment</span><h3 id="totalCount">250</h3></div><div class="icon">📦</div></div>
+                    <div class="card stat"><div><span class="muted">Available</span><h3 id="availableCount">180</h3></div><div class="icon">✓</div></div>
+                    <div class="card stat"><div><span class="muted">Borrowed</span><h3 id="borrowedCount">55</h3></div><div class="icon">↗</div></div>
+                    <div class="card stat"><div><span class="muted">Overdue</span><h3 id="overdueCount">15</h3></div><div class="icon">!</div></div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><h3>Recent Borrowing Requests</h3><button class="btn secondary" onclick="showSection('borrowing')">View All</button></div>
+                        <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Borrower</th><th>Equipment</th><th>Date</th><th>Status</th></tr></thead>
+                            <tbody>
+                                <tr><td>Juan Dela Cruz</td><td>Projector 001</td><td>Oct 03, 2026</td><td><span class="badge pending">Pending</span></td></tr>
+                                <tr><td>Maria Santos</td><td>Digital Camera 002</td><td>Oct 03, 2026</td><td><span class="badge approved">Approved</span></td></tr>
+                                <tr><td>Pedro Reyes</td><td>Laptop 003</td><td>Oct 02, 2026</td><td><span class="badge overdue">Overdue</span></td></tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="card" id="studentEquipmentStatusCard">
+                        <div class="card-header"><h3>Equipment Status</h3></div>
+                        <table>
+                            <tbody>
+                                <tr><td>Available</td><td><strong>180</strong></td></tr>
+                                <tr><td>Borrowed</td><td><strong>55</strong></td></tr>
+                                <tr><td>Maintenance</td><td><strong>10</strong></td></tr>
+                                <tr><td>Lost / Damaged</td><td><strong>5</strong></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- INVENTORY -->
+            <section class="section" id="inventory">
+                <div class="card-header">
+                    <div><h2>Equipment Inventory</h2><p class="muted">Centralized registry of all school equipment.</p></div>
+                    <button class="btn" onclick="showSection('addEquipment')">+ Add Equipment</button>
+                </div>
+                <div class="card">
+                    <div class="toolbar">
+                        <input id="searchEquipment" type="search" placeholder="Search asset, serial, equipment..." oninput="filterInventory()">
+                        <select id="categoryFilter" onchange="filterInventory()">
+                            <option value="">All Categories</option><option>Computer</option><option>Projector</option><option>Camera</option><option>Laboratory</option><option>Sports</option>
+                        </select>
+                        <select id="statusFilter" onchange="filterInventory()">
+                            <option value="">All Status</option><option>Available</option><option>Borrowed</option><option>Maintenance</option><option>Archived</option>
+                        </select>
+                        <button class="btn secondary" type="button" onclick="toggleArchivedInventory()" id="archiveToggleBtn">Show Archived</button>
+                    </div>
+                    <div class="table-wrap">
+                    <table id="inventoryTable">
+                        <thead><tr><th>Asset No.</th><th>Photo</th><th>Equipment</th><th>Serial No.</th><th>Category</th><th>Location</th><th>Condition</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="inventoryBody"></tbody>
+                    </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ADD EQUIPMENT -->
+            <section class="section" id="addEquipment">
+                <div class="card form-card">
+                    <div class="card-header"><div><h2>Register Equipment</h2><p class="muted">Add a complete equipment record to the centralized inventory.</p></div></div>
+                    <form id="equipmentForm">
+                        <div class="form-grid">
+                            <div class="form-group"><label>Equipment Name</label><input id="eqName" required placeholder="e.g. Projector 006"></div>
+                            <div class="form-group"><label>Asset Number</label><input id="eqAsset" required placeholder="e.g. EQ-006"></div>
+                            <div class="form-group"><label>Serial Number</label><input id="eqSerial" required placeholder="Enter serial number"></div>
+                            <div class="form-group"><label>Category</label><select id="eqCategory" required><option>Computer</option><option>Projector</option><option>Camera</option><option>Laboratory</option><option>Sports</option></select></div>
+                            <div class="form-group"><label>Location</label><input id="eqLocation" required placeholder="e.g. ICT Laboratory"></div>
+                            <div class="form-group"><label>Condition</label><select id="eqCondition"><option>Good</option><option>Fair</option><option>Needs Repair</option></select></div>
+                            <div class="form-group"><label>Status</label><select id="eqStatus"><option>Available</option><option>Borrowed</option><option>Maintenance</option></select></div>
+                            <div class="form-group"><label>Equipment Photograph</label><input id="eqPhoto" type="file" accept="image/*"></div>
+                            <div class="form-group full"><label>Remarks</label><textarea id="eqRemarks" placeholder="Additional information, accessories, specifications, or notes..."></textarea></div>
+                            <div class="full"><button class="btn" type="submit">Save Equipment Record</button> <button class="btn secondary" type="button" onclick="showSection('inventory')">Cancel</button></div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- EQUIPMENT RECORD MODAL -->
+            <div class="record-overlay" id="equipmentRecordOverlay">
+                <div class="record-card">
+                    <div class="record-head">
+                        <div><h2 id="recordTitle">Equipment Record</h2><p class="muted" id="recordSubtitle">Complete equipment information</p></div>
+                        <button class="close-register" type="button" onclick="closeEquipmentRecord()">×</button>
+                    </div>
+                    <div id="recordContent"></div>
+                </div>
+            </div>
+
+            <!-- QR MANAGEMENT SECTION -->
+            <section class="section" id="qr">
+                <div class="card-header"><div><h2>QR Code Management</h2><p class="muted">Generate and scan QR codes for rapid equipment identification.</p></div></div>
+                <div class="grid-2">
+                    <!-- ONLY SHOWN TO ADMIN & STAFF -->
+                    <div class="card" id="qrGenCard">
+                        <h3>Generate Equipment QR</h3>
+                        <p class="muted" style="margin:8px 0 18px">Enter an asset number to create a printable QR label.</p>
+                        <input id="qrAsset" placeholder="Example: EQ-001">
+                        <div class="qr-box" id="qrBox">EQ-001</div>
+                        <div style="text-align:center"><button class="btn" onclick="generateQR()">Generate QR</button> <button class="btn secondary" onclick="printQRLabel()">Print Label</button> <button class="btn green" id="saveQrImageBtn" onclick="saveGeneratedQRImage()" style="display:none;margin-top:8px">Save Image (JPG)</button></div>
+                    </div>
+                    <!-- SHOWN TO EVERYONE (STUDENTS & STAFF) WITH CAMERA & UPLOAD OPTIONS -->
+                    <div class="card" id="qrScanCard" style="grid-column: 1 / -1;">
+                        <h3>QR Code Scanner</h3>
+                        <p class="muted" style="margin:8px 0 18px">Scan using device camera or upload a QR code photo file.</p>
+                        <div style="border:2px dashed #b9c7d2;border-radius:12px;padding:40px;text-align:center;">
+                            <div style="font-size:40px;margin-bottom:10px;">▦</div>
+                            <p class="muted" style="margin-bottom:15px;">Point your camera at a QR code OR upload a saved QR image.</p>
+                            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn" onclick="startQRScanner()">📷 Start Camera Scanner</button>
+                                <button class="btn secondary" onclick="document.getElementById('qrFileInput').click()">🖼️ Upload QR Image</button>
+                                <input type="file" id="qrFileInput" accept="image/*" style="display:none" onchange="handleQRFileUpload(this)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BORROWING -->
+            <section class="section" id="borrowing">
+                <div class="card-header"><div><h2>Borrowing Requests</h2><p class="muted">Review, approve, or reject equipment requests.</p></div><button class="btn" onclick="showSection('borrowForm')">+ New Request</button></div>
+                <div class="card">
+                    <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Request ID</th><th>Borrower</th><th>Equipment</th><th>Borrow Date</th><th>Return Date</th><th>Status</th><th id="requestActionHeader">Action</th></tr></thead>
+                        <tbody id="requestBody">
+                            <tr><td>REQ-1001</td><td>Juan Dela Cruz</td><td>Projector 001</td><td>Oct 03</td><td>Oct 05</td><td><span class="badge pending">Pending</span></td><td><button class="btn green" onclick="approveRequest(this)">Approve</button> <button class="btn red" onclick="rejectRequest(this)">Reject</button></td></tr>
+                            <tr><td>REQ-1002</td><td>Maria Santos</td><td>Digital Camera 002</td><td>Oct 03</td><td>Oct 04</td><td><span class="badge approved">Approved</span></td><td><button class="btn secondary">View</button></td></tr>
+                            <tr><td>REQ-1003</td><td>Pedro Reyes</td><td>Laptop 003</td><td>Sep 30</td><td>Oct 01</td><td><span class="badge overdue">Overdue</span></td><td><button class="btn orange" onclick="sendBorrowingReminder(this)">Remind</button></td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BORROW FORM -->
+            <section class="section" id="borrowForm">
+                <div class="card form-card">
+                    <div class="card-header"><div><h2>New Borrowing Request</h2><p class="muted">Submit a request for available equipment.</p></div></div>
+                    <form id="borrowRequestForm">
+                        <div class="form-grid">
+                            <div class="form-group"><label>Borrower Name</label><input required placeholder="Full name"></div>
+                            <div class="form-group"><label>Student / Employee ID</label><input required placeholder="ID number"></div>
+                            <div class="form-group"><label>Equipment</label><select required><option>Projector 001</option><option>Basketball Set</option><option>Microscope 005</option></select></div>
+                            <div class="form-group"><label>Purpose</label><input required placeholder="Class activity / event"></div>
+                            <div class="form-group"><label>Borrow Date</label><input type="date" required></div>
+                            <div class="form-group"><label>Expected Return Date</label><input type="date" required></div>
+                            <div class="form-group full"><label>Remarks</label><textarea placeholder="Additional request details..."></textarea></div>
+                            <div class="full"><button class="btn" type="submit">Submit Request</button> <button class="btn secondary" type="button" onclick="showSection('borrowing')">Cancel</button></div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TRANSACTIONS -->
+            <section class="section" id="transactions">
+                <div class="card-header"><div><h2>Release & Return Transactions</h2><p class="muted">Record releases, actual returns, accessories, and equipment condition.</p></div></div>
+                <div class="card">
+                    <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Transaction</th><th>Borrower</th><th>Equipment</th><th>Issued By</th><th>Schedule</th><th>Actual Return</th><th>Status</th></tr></thead>
+                        <tbody id="transactionsBody">
+                            <tr><td>TRX-501</td><td>Maria Santos</td><td>Digital Camera 002</td><td>Admin</td><td>Oct 03–04</td><td>—</td><td><span class="badge borrowed">Borrowed</span></td></tr>
+                            <tr><td>TRX-500</td><td>John Cruz</td><td>Projector 004</td><td>Staff</td><td>Oct 01–02</td><td>Oct 02</td><td><span class="badge available">Returned</span></td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MAINTENANCE -->
+            <section class="section" id="maintenance">
+                <div class="card-header"><div><h2>Damage & Maintenance</h2><p class="muted">Track incidents, repairs, maintenance schedules, costs, and resolution.</p></div><button class="btn" onclick="recordIncident()">+ Record Incident</button></div>
+                <div class="card">
+                    <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Asset</th><th>Incident</th><th>Date</th><th>Cost</th><th>Status</th><th>Resolution</th></tr></thead>
+                        <tbody id="maintenanceBody">
+                            <tr><td>EQ-003 Laptop 003</td><td>Battery issue</td><td>Oct 02</td><td>₱1,500</td><td><span class="badge maintenance">Under Repair</span></td><td>Replacement pending</td></tr>
+                            <tr><td>EQ-009 Projector 009</td><td>Lens damage</td><td>Sep 29</td><td>₱2,800</td><td><span class="badge approved">Resolved</span></td><td>Lens replaced</td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- REPORTS -->
+            <section class="section" id="reports">
+                <div class="card-header"><div><h2>Reports</h2><p class="muted">Generate management reports and export records.</p></div></div>
+                <div class="cards">
+                    <div class="card"><h3>📦 Inventory Report</h3><p class="muted" style="margin:10px 0 18px">Equipment, location, condition, and status.</p><button class="btn" onclick="downloadCSV('inventory')">Export CSV</button></div>
+                    <div class="card"><h3>📝 Borrowing Report</h3><p class="muted" style="margin:10px 0 18px">Borrowing requests and transaction history.</p><button class="btn" onclick="downloadCSV('borrowing')">Export CSV</button></div>
+                    <div class="card"><h3>🔧 Maintenance Report</h3><p class="muted" style="margin:10px 0 18px">Incidents, repairs, costs, and resolutions.</p><button class="btn" onclick="downloadCSV('maintenance')">Export CSV</button></div>
+                    <div class="card"><h3>⚠️ Overdue Report</h3><p class="muted" style="margin:10px 0 18px">Items requiring return reminders.</p><button class="btn orange" onclick="generateOverdueReport()">Generate</button></div>
+                </div>
+            </section>
+
+            <!-- NOTIFICATIONS -->
+            <section class="section" id="notifications">
+                <div class="card-header"><div><h2>Notifications</h2><p class="muted">System alerts and reminders.</p></div><button class="btn secondary" onclick="markAllNotificationsRead()">Mark All Read</button></div>
+                <div class="card">
+                    <table>
+                        <tbody id="notificationsBody">
+                            <tr><td>🔔</td><td><strong>Overdue Equipment</strong><br><span class="muted">Laptop 003 is overdue for return.</span></td><td>Today</td></tr>
+                            <tr><td>✓</td><td><strong>Request Approved</strong><br><span class="muted">Your request for Digital Camera 002 was approved.</span></td><td>Today</td></tr>
+                            <tr><td>🔧</td><td><strong>Maintenance Update</strong><br><span class="muted">Laptop 003 is currently under repair.</span></td><td>Yesterday</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- USERS -->
+            <section class="section" id="users">
+                <div class="card-header"><div><h2>User Management</h2><p class="muted">Manage system users, roles, and permissions.</p></div><button class="btn" onclick="openRegister()">+ Add User</button></div>
+                <div class="card">
+                    <table>
+                        <thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Role</th><th>Password</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SETTINGS -->
+            <section class="section" id="settings">
+                <div class="card form-card">
+                    <div class="card-header"><div><h2>System Settings</h2><p class="muted">Configure basic E-QUIP preferences.</p></div></div>
+                    <div class="form-group"><label>System Name</label><input id="settingSystemName" value="E-QUIP: School Equipment Borrowing and Inventory System"></div>
+                    <div class="form-group"><label>Default Reminder Days</label><input id="settingReminderDays" type="number" min="0" value="1"></div>
+                    <div class="form-group"><label>School Email</label><input id="settingSchoolEmail" type="email" value="admin@equip.edu"></div>
+                    <button class="btn" onclick="saveSystemSettings()">Save Settings</button>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<!-- CREATE ACCOUNT -->
+<div class="register-overlay" id="registerOverlay">
+    <div class="register-card">
+        <div class="register-head">
+            <div><h2>Create Account</h2><p class="muted">Create a new E-QUIP user account.</p></div>
+            <button class="close-register" type="button" onclick="closeRegister()">×</button>
+        </div>
+        <form id="registerForm">
+            <div class="form-group"><label>Full Name</label><input id="regName" type="text" placeholder="Enter full name" required></div>
+            <div class="form-group"><label>Email</label><input id="regEmail" type="email" placeholder="Enter email" required></div>
+            <div class="form-group"><label>Username</label><input id="regUser" type="text" placeholder="Choose username" required></div>
+            <div class="form-group"><label>Role</label>
+                <select id="regRole" required>
+                    <option>Administrator</option>
+                    <option>Inventory / Maintenance Staff</option>
+                    <option>Faculty / Staff / Student</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Password</label><input id="regPass" type="password" minlength="6" placeholder="At least 6 characters" required></div>
+            <div class="form-group"><label>Confirm Password</label><input id="regConfirm" type="password" minlength="6" placeholder="Confirm password" required></div>
+            <div class="register-actions">
+                <button class="btn secondary" type="button" onclick="closeRegister()">Cancel</button>
+                <button class="btn" type="submit">Create Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- HIDDEN HTML5 QR DECODER CONTAINER FOR FILE UPLOAD SCANNING -->
+<div id="hiddenQrContainer" style="display:none;"></div>
+
+<script>
+    const titles = {
+        dashboard: "Dashboard",
+        inventory: "Equipment Inventory",
+        addEquipment: "Register Equipment",
+        qr: "QR Code Management",
+        borrowing: "Borrowing Requests",
+        borrowForm: "New Borrowing Request",
+        transactions: "Release & Return Transactions",
+        maintenance: "Damage & Maintenance",
+        reports: "Reports",
+        notifications: "Notifications",
+        users: "User Management",
+        settings: "Settings"
+    };
+
+    const ROLE_ACCESS = {
+        'Administrator': ['dashboard','inventory','addEquipment','qr','borrowing','borrowForm','transactions','maintenance','reports','notifications','users','settings'],
+        'Inventory / Maintenance Staff': ['dashboard','inventory','addEquipment','qr','borrowing','borrowForm','transactions','maintenance','reports','notifications'],
+        'Faculty / Staff / Student': ['dashboard','inventory','qr','borrowing','borrowForm','transactions','maintenance','notifications']
+    };
+
+    let activeAccount = null;
+
+    function hasAccess(id) {
+        return !activeAccount || (ROLE_ACCESS[activeAccount.role] || []).includes(id);
+    }
+
+    function applyRoleAccess() {
+        const role = activeAccount ? activeAccount.role : 'Administrator';
+        document.querySelectorAll('.nav-item[data-section]').forEach(btn => {
+            btn.style.display = hasAccess(btn.dataset.section) ? '' : 'none';
+        });
+
+        const qrGenCard = document.getElementById('qrGenCard');
+        const qrScanCard = document.getElementById('qrScanCard');
+
+        if (role === 'Faculty / Staff / Student') {
+            if (qrGenCard) qrGenCard.style.display = 'none';
+            if (qrScanCard) qrScanCard.style.gridColumn = '1 / -1';
+        } else {
+            if (qrGenCard) qrGenCard.style.display = '';
+            if (qrScanCard) qrScanCard.style.gridColumn = '';
+        }
+
+        document.querySelectorAll('[onclick]').forEach(el => {
+            const action = el.getAttribute('onclick') || '';
+            let hide = false;
+            if (role === 'Faculty / Staff / Student') {
+                hide = action.includes("showSection('addEquipment')") || action.includes('approveRequest') || action.includes('rejectRequest') || action.includes('generateQR') || action.includes('saveGeneratedQRImage') || action.includes('downloadCSV') || action.includes('openRegister') || action.includes("showToast('Maintenance record form opened.')");
+            } else if (role === 'Inventory / Maintenance Staff') {
+                hide = action.includes('openRegister') && !el.closest('#loginPage');
+            }
+            if (el.id !== 'logoutBtn') el.style.display = hide ? 'none' : '';
+        });
+
+        applyBorrowingView();
+        renderStudentDashboard();
+    }
+
+    const BORROWING_REQUESTS_KEY = 'equipBorrowingRequests';
+
+    function getBorrowingRequests() {
+        try {
+            const raw = localStorage.getItem(BORROWING_REQUESTS_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (err) {
+            return [];
+        }
+    }
+
+    function saveBorrowingRequests(requests) {
+        localStorage.setItem(BORROWING_REQUESTS_KEY, JSON.stringify(requests));
+    }
+
+    function renderStudentDashboard() {
+        const cards = document.querySelectorAll('#dashboard .cards .stat');
+        if (!cards.length) return;
+
+        const role = activeAccount ? activeAccount.role : 'Administrator';
+        const isRegularUser = role === 'Faculty / Staff / Student';
+        const equipmentStatusCard = document.getElementById('studentEquipmentStatusCard');
+
+        if (!isRegularUser) {
+            if (equipmentStatusCard) equipmentStatusCard.style.display = '';
+            cards[0].style.display = '';
+            cards[1].style.display = '';
+            cards[2].style.display = '';
+            cards[3].style.display = '';
+            cards[0].querySelector('.muted').textContent = 'Total Equipment';
+            cards[1].querySelector('.muted').textContent = 'Available';
+            cards[2].querySelector('.muted').textContent = 'Borrowed';
+            cards[3].querySelector('.muted').textContent = 'Overdue';
+            return;
+        }
+
+        const currentUser = String(activeAccount?.name || '').trim().toLowerCase();
+        const ownRequests = getBorrowingRequests().filter(r =>
+            String(r.ownerName || r.borrower || '').trim().toLowerCase() === currentUser
+        );
+
+        const pending = ownRequests.filter(r => r.status === 'Pending').length;
+        const borrowed = ownRequests.filter(r => r.status === 'Approved').length;
+        const overdue = ownRequests.filter(r => r.status === 'Overdue').length;
+
+        let available = 0;
+        try {
+            available = getInventoryRecords().filter(item => !item.archived && item.status === 'Available').length;
+        } catch (e) {
+            available = 0;
+        }
+
+        cards[0].style.display = '';
+        cards[1].style.display = '';
+        cards[2].style.display = '';
+        cards[3].style.display = '';
+
+        cards[0].querySelector('.muted').textContent = 'Available';
+        cards[0].querySelector('h3').textContent = available;
+        cards[1].querySelector('.muted').textContent = 'Borrowed';
+        cards[1].querySelector('h3').textContent = borrowed;
+        cards[2].querySelector('.muted').textContent = 'Pending';
+        cards[2].querySelector('h3').textContent = pending;
+        cards[3].querySelector('.muted').textContent = 'Overdue';
+        cards[3].querySelector('h3').textContent = overdue;
+        if (equipmentStatusCard) equipmentStatusCard.style.display = 'none';
+
+        const recentBody = document.querySelector('#dashboard .grid-2 .card:first-child tbody');
+        if (recentBody) {
+            recentBody.innerHTML = '';
+            ownRequests.slice(-5).reverse().forEach(r => {
+                const tr = document.createElement('tr');
+                const statusClass = r.status === 'Approved' ? 'approved' : (r.status === 'Overdue' ? 'overdue' : 'pending');
+                tr.innerHTML = `<td>${escapeHtml(r.borrower || currentUser)}</td><td>${escapeHtml(r.equipment || '')}</td><td>${escapeHtml(r.borrowDate || '')}</td><td><span class="badge ${statusClass}">${escapeHtml(r.status || 'Pending')}</span></td>`;
+                recentBody.appendChild(tr);
+            });
+            if (!ownRequests.length) {
+                recentBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px" class="muted">You have no borrowing requests yet.</td></tr>';
+            }
+        }
+    }
+
+    function approveRequest(button) {
+        const row = button.closest('tr');
+        if (!row) return;
+        const requestId = row.cells[0]?.textContent.trim();
+        const requests = getBorrowingRequests();
+        const request = requests.find(r => r.id === requestId);
+        if (request) {
+            request.status = 'Approved';
+            saveBorrowingRequests(requests);
+            syncInventoryWithBorrowingRequests();
+            renderInventory();
+            renderBorrowingRequests();
+            renderStudentDashboard();
+            showToast('Borrowing request approved.');
+        } else {
+            showToast('Borrowing request approved.');
+        }
+    }
+
+    function rejectRequest(button) {
+        const row = button.closest('tr');
+        if (!row) return;
+        const requestId = row.cells[0]?.textContent.trim();
+        const requests = getBorrowingRequests();
+        const request = requests.find(r => r.id === requestId);
+        if (request) {
+            request.status = 'Rejected';
+            saveBorrowingRequests(requests);
+            renderBorrowingRequests();
+            renderStudentDashboard();
+            showToast('Borrowing request rejected.');
+        } else {
+            showToast('Borrowing request rejected.');
+        }
+    }
+
+    function renderBorrowingRequests() {
+        const tbody = document.getElementById('requestBody');
+        if (!tbody) return;
+
+        const role = activeAccount ? activeAccount.role : 'Administrator';
+        const isRegularUser = role === 'Faculty / Staff / Student';
+        const currentUser = activeAccount ? String(activeAccount.name || '').trim().toLowerCase() : '';
+        const savedRequests = getBorrowingRequests();
+
+        const staticRows = [
+            ['REQ-1001','Juan Dela Cruz','Projector 001','Oct 03','Oct 05','Pending','pending'],
+            ['REQ-1002','Maria Santos','Digital Camera 002','Oct 03','Oct 04','Approved','approved'],
+            ['REQ-1003','Pedro Reyes','Laptop 003','Sep 30','Oct 01','Overdue','overdue']
+        ];
+
+        const allRows = savedRequests.map(r => ({
+            id:r.id, borrower:r.borrower, ownerName:r.ownerName, equipment:r.equipment, borrowDate:r.borrowDate, returnDate:r.returnDate, status:r.status, saved:true
+        }));
+
+        if (!isRegularUser) {
+            staticRows.forEach(r => allRows.push({id:r[0],borrower:r[1],equipment:r[2],borrowDate:r[3],returnDate:r[4],status:r[5],badge:r[6]}));
+        }
+
+        const visibleRows = isRegularUser
+            ? allRows.filter(r => String(r.ownerName || r.borrower || '').trim().toLowerCase() === currentUser)
+            : allRows;
+
+        const header = document.getElementById('requestActionHeader');
+        if (header) header.style.display = isRegularUser ? 'none' : '';
+
+        tbody.innerHTML = '';
+
+        visibleRows.forEach(r => {
+            const tr = document.createElement('tr');
+            const statusClass = r.status === 'Approved' ? 'approved' : (r.status === 'Overdue' ? 'overdue' : 'pending');
+            let action = '';
+            if (!isRegularUser) {
+                action = `<button class="btn secondary" onclick="viewBorrowRequest('${escapeHtml(String(r.id))}')">View</button>`;
+            }
+            tr.innerHTML = `<td>${r.id}</td><td>${r.borrower}</td><td>${r.equipment}</td><td>${r.borrowDate}</td><td>${r.returnDate}</td><td><span class="badge ${statusClass}">${r.status}</span></td><td class="request-action-cell" style="${isRegularUser ? 'display:none' : ''}">${action}</td>`;
+            tbody.appendChild(tr);
+        });
+
+        if (isRegularUser && visibleRows.length === 0) {
+            const row = document.createElement('tr');
+            row.id = 'noOwnRequestsRow';
+            row.innerHTML = '<td colspan="7" style="text-align:center;padding:24px" class="muted">You have no borrowing requests yet.</td>';
+            tbody.appendChild(row);
+        }
+    }
+
+    function viewBorrowRequest(requestId) {
+        const requests = getBorrowingRequests();
+        const request = requests.find(r => r.id === requestId);
+        const staticDetails = {
+            'REQ-1001': {purpose:'Class activity / presentation', remarks:'Projector needed for the scheduled class activity.'},
+            'REQ-1002': {purpose:'Media activity', remarks:'Camera needed for the scheduled media activity.'},
+            'REQ-1003': {purpose:'Laboratory / class activity', remarks:'Equipment is needed for the scheduled activity.'}
+        };
+        const fallback = staticDetails[requestId] || {};
+        const data = request || {id:requestId, borrower:'—', equipment:'—', borrowDate:'—', returnDate:'—', status:'—', purpose:fallback.purpose, remarks:fallback.remarks};
+        const purpose = data.purpose || fallback.purpose || 'No purpose provided.';
+        const remarks = data.remarks || fallback.remarks || 'No remarks provided.';
+        const status = data.status || 'Pending';
+        const actionButtons = status === 'Pending'
+            ? `<button class="btn green" type="button" onclick="approveBorrowRequestFromDetails('${String(requestId).replace(/'/g, "\\'")}')">Accept</button>
+               <button class="btn red" type="button" onclick="rejectBorrowRequestFromDetails('${String(requestId).replace(/'/g, "\\'")}')">Reject</button>`
+            : `<span class="badge ${statusClass(status)}">${escapeHtml(status)}</span>`;
+
+        const overlay = document.getElementById('equipmentRecordOverlay');
+        const title = document.getElementById('recordTitle');
+        const subtitle = document.getElementById('recordSubtitle');
+        const content = document.getElementById('recordContent');
+        title.textContent = 'Borrowing Request Details';
+        subtitle.textContent = data.id + ' • ' + (data.borrower || 'Borrower');
+        content.innerHTML = `<div class="record-grid">
+            <div class="record-field"><label>Request ID</label><strong>${escapeHtml(data.id || '—')}</strong></div>
+            <div class="record-field"><label>Borrower</label><strong>${escapeHtml(data.borrower || '—')}</strong></div>
+            <div class="record-field"><label>Equipment</label><span>${escapeHtml(data.equipment || '—')}</span></div>
+            <div class="record-field"><label>Status</label><span class="badge ${statusClass(status)}">${escapeHtml(status)}</span></div>
+            <div class="record-field"><label>Borrow Date</label><span>${escapeHtml(data.borrowDate || '—')}</span></div>
+            <div class="record-field"><label>Return Date</label><span>${escapeHtml(data.returnDate || '—')}</span></div>
+            <div class="record-field full"><label>Purpose</label><span>${escapeHtml(purpose)}</span></div>
+            <div class="record-field full"><label>Remarks</label><span>${escapeHtml(remarks)}</span></div>
+        </div>
+        <div class="record-actions">
+            <button class="btn secondary" type="button" onclick="closeEquipmentRecord()">Close</button>
+            ${actionButtons}
+        </div>`;
+        overlay.classList.add('show');
+    }
+
+    function approveBorrowRequestFromDetails(requestId) {
+        const requests = getBorrowingRequests();
+        const request = requests.find(r => r.id === requestId);
+        if (!request) { showToast('Borrowing request approved.'); closeEquipmentRecord(); return; }
+        request.status = 'Approved';
+        saveBorrowingRequests(requests);
+        syncInventoryWithBorrowingRequests();
+        renderInventory();
+        closeEquipmentRecord();
+        renderBorrowingRequests();
+        renderStudentDashboard();
+        showToast('Borrowing request approved.');
+    }
+
+    function rejectBorrowRequestFromDetails(requestId) {
+        const requests = getBorrowingRequests();
+        const request = requests.find(r => r.id === requestId);
+        if (!request) { showToast('Borrowing request rejected.'); closeEquipmentRecord(); return; }
+        request.status = 'Rejected';
+        saveBorrowingRequests(requests);
+        closeEquipmentRecord();
+        renderBorrowingRequests();
+        renderStudentDashboard();
+        showToast('Borrowing request rejected.');
+    }
+
+    function applyBorrowingView() {
+        renderBorrowingRequests();
+    }
+
+    function showSection(id) {
+        if (!hasAccess(id)) {
+            showToast('You do not have permission to access this section.');
+            return;
+        }
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        const target = document.getElementById(id);
+        if (target) target.classList.add('active');
+
+        document.querySelectorAll('.nav-item[data-section]').forEach(btn => btn.classList.remove('active'));
+        const nav = document.querySelector('.nav-item[data-section="' + id + '"]');
+        if (nav) nav.classList.add('active');
+
+        document.getElementById('pageTitle').textContent = titles[id] || "E-QUIP";
+        if (id === 'borrowing') applyBorrowingView();
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    document.querySelectorAll('.nav-item[data-section]').forEach(btn => {
+        btn.addEventListener('click', () => showSection(btn.dataset.section));
+    });
+
+    const DEFAULT_ACCOUNT = {
+        name: 'System Administrator',
+        email: 'admin@equip.edu',
+        username: 'admin',
+        role: 'Administrator',
+        password: 'admin123'
+    };
+    const ACCOUNTS_KEY = 'equipAccounts';
+
+    function getAccounts() {
+        try {
+            const raw = localStorage.getItem(ACCOUNTS_KEY);
+            if (!raw) {
+                const initial = [DEFAULT_ACCOUNT];
+                localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(initial));
+                return initial;
+            }
+            const saved = JSON.parse(raw);
+            if (!Array.isArray(saved)) throw new Error('Invalid accounts data');
+
+            if (!saved.some(a => String(a.username).toLowerCase() === 'admin')) {
+                saved.unshift(DEFAULT_ACCOUNT);
+                localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(saved));
+            }
+            return saved;
+        } catch (error) {
+            const initial = [DEFAULT_ACCOUNT];
+            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(initial));
+            return initial;
+        }
+    }
+
+    let accounts = getAccounts();
+
+    function saveAccounts() {
+        localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    }
+
+    function openRegister() {
+        document.getElementById('registerOverlay').style.display = 'flex';
+        document.getElementById('registerForm').reset();
+    }
+
+    function closeRegister() {
+        document.getElementById('registerOverlay').style.display = 'none';
+        document.getElementById('registerForm').reset();
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById('regName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const username = document.getElementById('regUser').value.trim();
+        const role = document.getElementById('regRole').value;
+        const password = document.getElementById('regPass').value;
+        const confirm = document.getElementById('regConfirm').value;
+
+        if (!name || !email || !username || !role || !password) {
+            showToast('Please complete all fields.');
+            return;
+        }
+        if (password !== confirm) {
+            showToast('Passwords do not match.');
+            return;
+        }
+        if (password.length < 6) {
+            showToast('Password must be at least 6 characters.');
+            return;
+        }
+        if (accounts.some(a => a.username.toLowerCase() === username.toLowerCase())) {
+            showToast('Username already exists.');
+            return;
+        }
+        if (accounts.some(a => a.email.toLowerCase() === email.toLowerCase())) {
+            showToast('Email is already registered.');
+            return;
+        }
+
+        const newAccount = { name, email, username, role, password };
+        accounts.push(newAccount);
+        saveAccounts();
+
+        closeRegister();
+        document.getElementById('loginUser').value = username;
+        document.getElementById('loginPass').value = password;
+        document.getElementById('loginRole').value = role;
+        renderUsers();
+        showToast('Account created and saved successfully.');
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        accounts = getAccounts();
+
+        const username = document.getElementById('loginUser').value.trim();
+        const password = document.getElementById('loginPass').value;
+        const role = document.getElementById('loginRole').value;
+        const account = accounts.find(a =>
+            a.username.toLowerCase() === username.toLowerCase() &&
+            a.password === password &&
+            a.role === role
+        );
+
+        if (!account) {
+            showToast('Invalid username, password, or role.');
+            return;
+        }
+
+        activeAccount = account;
+        document.getElementById('userDisplay').textContent = account.name;
+        document.querySelector('.profile small').textContent = account.role;
+        applyRoleAccess();
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        showToast('Welcome, ' + account.name + '!');
+
+        if (document.getElementById('users')) renderUsers();
+    });
+
+    function toggleLoginPassword() {
+        const passwordInput = document.getElementById('loginPass');
+        if (!passwordInput) return;
+        const toggleButton = passwordInput.parentElement
+            ? passwordInput.parentElement.querySelector('button') : null;
+        const shouldShow = passwordInput.type === 'password';
+        passwordInput.type = shouldShow ? 'text' : 'password';
+        if (toggleButton) {
+            toggleButton.textContent = shouldShow ? 'Hide' : 'Show';
+            toggleButton.setAttribute('aria-pressed', shouldShow ? 'true' : 'false');
+        }
+    }
+    // Explicitly expose the handler for the existing inline button action.
+    window.toggleLoginPassword = toggleLoginPassword;
+
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        accounts = getAccounts();
+        activeAccount = null;
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('loginPage').style.display = 'flex';
+        document.querySelector('.register-link').style.display = '';
+        document.getElementById('loginForm').reset();
+        showToast('Logged out. Your account is still saved.');
+    });
+
+    function renderUsers() {
+        const tbody = document.getElementById('usersTableBody');
+        if (!tbody) return;
+        const isAdmin = activeAccount && activeAccount.role === 'Administrator';
+        tbody.innerHTML = accounts.map((account, index) => {
+            const passwordCell = isAdmin
+                ? `<div style="display:flex;gap:6px;align-items:center;min-width:150px">
+                     <input id="userPass_${index}" type="password" value="${escapeHtml(account.password)}" readonly style="max-width:120px;padding:7px">
+                     <button class="btn secondary" type="button" onclick="toggleUserPassword(${index})" title="Show/Hide password">👁️</button>
+                   </div>`
+                : '<span class="muted">Hidden</span>';
+            const actionCell = isAdmin
+                ? `<button class="btn secondary" type="button" onclick="openManageUser(${index})">Manage</button>`
+                : '<span class="muted">—</span>';
+            return `
+                <tr>
+                    <td>${escapeHtml(account.name)}</td>
+                    <td>${escapeHtml(account.email)}</td>
+                    <td>${escapeHtml(account.username)}</td>
+                    <td>${escapeHtml(account.role)}</td>
+                    <td>${passwordCell}</td>
+                    <td><span class="badge available">Active</span></td>
+                    <td>${actionCell}</td>
+                </tr>`;
+        }).join('');
+    }
+
+    function toggleUserPassword(index) {
+        if (!activeAccount || activeAccount.role !== 'Administrator') {
+            showToast('Only the Administrator can view passwords.');
+            return;
+        }
+        const input = document.getElementById('userPass_' + index);
+        if (!input) return;
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    let managedUserIndex = null;
+
+    function openManageUser(index) {
+        if (!activeAccount || activeAccount.role !== 'Administrator') {
+            showToast('Only the Administrator can manage users.');
+            return;
+        }
+        const account = accounts[index];
+        if (!account) return;
+        managedUserIndex = index;
+        document.getElementById('manageUserUsername').value = account.username;
+        document.getElementById('manageUserSubtitle').textContent = 'Change password or role for ' + account.username + '.';
+        document.getElementById('manageUserPassword').value = '';
+        document.getElementById('manageUserRole').value = account.role;
+        document.getElementById('manageUserOverlay').classList.add('show');
+    }
+
+    function closeManageUser() {
+        const overlay = document.getElementById('manageUserOverlay');
+        if (overlay) overlay.classList.remove('show');
+        managedUserIndex = null;
+    }
+
+    function saveManagedUser() {
+        if (!activeAccount || activeAccount.role !== 'Administrator') {
+            showToast('Only the Administrator can manage users.');
+            return;
+        }
+        if (managedUserIndex === null || !accounts[managedUserIndex]) return;
+        const account = accounts[managedUserIndex];
+        const newPassword = document.getElementById('manageUserPassword').value.trim();
+        const newRole = document.getElementById('manageUserRole').value;
+
+        if (newPassword && newPassword.length < 6) {
+            showToast('Password must be at least 6 characters.');
+            return;
+        }
+
+        if (newPassword) account.password = newPassword;
+        account.role = newRole;
+        saveAccounts();
+        accounts = getAccounts();
+        renderUsers();
+        closeManageUser();
+        showToast('User changes saved successfully.');
+    }
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[char]));
+    }
+
+    renderUsers();
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.display = 'block';
+        clearTimeout(window.toastTimer);
+        window.toastTimer = setTimeout(() => toast.style.display = 'none', 2500);
+    }
+
+    const INVENTORY_KEY = 'equipInventoryRecords';
+    let showArchived = false;
+
+    const DEFAULT_INVENTORY = [
+        {asset:'EQ-001', name:'Projector 001', serial:'PJ-2026-001', category:'Projector', location:'Room 201', condition:'Good', status:'Available', photo:'', remarks:'Standard classroom projector.', registeredAt:'2026-10-01', archived:false},
+        {asset:'EQ-002', name:'Digital Camera 002', serial:'CAM-2026-002', category:'Camera', location:'Media Lab', condition:'Good', status:'Borrowed', photo:'', remarks:'Includes battery and charger.', registeredAt:'2026-10-01', archived:false},
+        {asset:'EQ-003', name:'Laptop 003', serial:'LT-2026-003', category:'Computer', location:'ICT Lab', condition:'Needs Repair', status:'Maintenance', photo:'', remarks:'For inspection and repair.', registeredAt:'2026-10-01', archived:false},
+        {asset:'EQ-004', name:'Basketball Set', serial:'SP-2026-004', category:'Sports', location:'Gymnasium', condition:'Good', status:'Available', photo:'', remarks:'Complete set.', registeredAt:'2026-10-01', archived:false},
+        {asset:'EQ-005', name:'Microscope 005', serial:'LAB-2026-005', category:'Laboratory', location:'Science Lab', condition:'Good', status:'Available', photo:'', remarks:'Laboratory microscope.', registeredAt:'2026-10-01', archived:false}
+    ];
+
+    function getInventoryRecords() {
+        try {
+            const raw = localStorage.getItem(INVENTORY_KEY);
+            if (!raw) {
+                localStorage.setItem(INVENTORY_KEY, JSON.stringify(DEFAULT_INVENTORY));
+                return JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+            }
+            const records = JSON.parse(raw);
+            if (!Array.isArray(records)) throw new Error('Invalid inventory data');
+            return records;
+        } catch (error) {
+            localStorage.setItem(INVENTORY_KEY, JSON.stringify(DEFAULT_INVENTORY));
+            return JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+        }
+    }
+
+    function saveInventoryRecords(records) {
+        localStorage.setItem(INVENTORY_KEY, JSON.stringify(records));
+    }
+
+    function syncInventoryWithBorrowingRequests() {
+        const records = getInventoryRecords();
+        const requests = getBorrowingRequests();
+        let changed = false;
+        records.forEach(item => {
+            if (item.archived) return;
+            const itemRequests = requests.filter(r => String(r.equipment || '').trim().toLowerCase() === String(item.name || '').trim().toLowerCase());
+            if (!itemRequests.length) return;
+            const latest = itemRequests.slice().reverse().find(r => ['Approved','Released','Overdue','Returned'].includes(r.status));
+            if (!latest) return;
+            const nextStatus = latest.status === 'Returned' ? 'Available' : 'Borrowed';
+            if (item.status !== nextStatus) { item.status = nextStatus; changed = true; }
+        });
+        if (changed) saveInventoryRecords(records);
+        return records;
+    }
+
+    function statusClass(status) {
+        return status === 'Available' ? 'available' : status === 'Borrowed' ? 'borrowed' : status === 'Maintenance' ? 'maintenance' : 'overdue';
+    }
+
+    function renderInventory() {
+        const tbody = document.getElementById('inventoryBody');
+        if (!tbody) return;
+        const records = syncInventoryWithBorrowingRequests();
+        tbody.innerHTML = '';
+        records.filter(item => showArchived ? item.archived : !item.archived).forEach(item => {
+            const tr = document.createElement('tr');
+            tr.dataset.asset = item.asset;
+            tr.dataset.archived = item.archived ? 'true' : 'false';
+            const photoCell = item.photo
+                ? `<img class="equipment-photo-thumb" src="${item.photo}" alt="${escapeHtml(item.name)}">`
+                : '<div class="equipment-photo-placeholder">📷</div>';
+            const displayStatus = item.archived ? 'Archived' : item.status;
+            tr.innerHTML = `<td>${escapeHtml(item.asset)}</td><td>${photoCell}</td><td>${escapeHtml(item.name)}</td><td>${escapeHtml(item.serial)}</td><td>${escapeHtml(item.category)}</td><td>${escapeHtml(item.location)}</td><td>${escapeHtml(item.condition)}</td><td><span class="badge ${statusClass(displayStatus)}">${escapeHtml(displayStatus)}</span></td><td><button class="btn secondary" onclick="viewItem('${escapeHtml(item.asset)}')">View</button></td>`;
+            tbody.appendChild(tr);
+        });
+        filterInventory();
+        const total = records.filter(item => !item.archived).length;
+        const totalCount = document.getElementById('totalCount');
+        if (totalCount) totalCount.textContent = total;
+    }
+
+    function filterInventory() {
+        const search = (document.getElementById('searchEquipment')?.value || '').toLowerCase().trim();
+        const category = (document.getElementById('categoryFilter')?.value || '').toLowerCase();
+        const status = (document.getElementById('statusFilter')?.value || '').toLowerCase();
+        document.querySelectorAll('#inventoryTable tbody tr').forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const rowCategory = row.children[4]?.textContent.toLowerCase() || '';
+            const rowStatus = row.children[7]?.textContent.toLowerCase() || '';
+            row.style.display = text.includes(search) && (!category || rowCategory === category) && (!status || rowStatus === status) ? '' : 'none';
+        });
+    }
+
+    function toggleArchivedInventory() {
+        showArchived = !showArchived;
+        const btn = document.getElementById('archiveToggleBtn');
+        if (btn) btn.textContent = showArchived ? 'Show Active' : 'Show Archived';
+        renderInventory();
+    }
+
+    function viewItem(id) {
+        const item = getInventoryRecords().find(record => record.asset === id);
+        if (!item) {
+            showToast('Equipment record not found.');
+            return;
+        }
+        const displayStatus = item.archived ? 'Archived' : item.status;
+        document.getElementById('recordTitle').textContent = item.name;
+        document.getElementById('recordSubtitle').textContent = item.asset + ' • ' + item.category;
+        const photo = item.photo ? `<img class="record-photo" src="${item.photo}" alt="${escapeHtml(item.name)}">` : '<div class="record-field full"><strong>No photograph uploaded.</strong></div>';
+        const isRegularUser = activeAccount && activeAccount.role === 'Faculty / Staff / Student';
+        const requestButton = isRegularUser && !item.archived && item.status === 'Available'
+            ? `<button class="btn" type="button" onclick="requestEquipment('${escapeHtml(item.asset)}')">Request This Equipment</button>`
+            : '';
+        const isAdmin = activeAccount && activeAccount.role === 'Administrator';
+        const adminAction = isAdmin
+            ? `<button class="btn secondary" type="button" onclick="modifyEquipment('${escapeHtml(item.asset)}')">Modify</button>
+               <button class="btn red" type="button" onclick="deleteEquipment('${escapeHtml(item.asset)}')">Delete</button>`
+            : '';
+        document.getElementById('recordContent').innerHTML = `<div class="record-grid">
+            <div class="record-field"><label>Asset Number</label><strong>${escapeHtml(item.asset)}</strong></div>
+            <div class="record-field"><label>Serial Number</label><strong>${escapeHtml(item.serial)}</strong></div>
+            <div class="record-field"><label>Category</label><span>${escapeHtml(item.category)}</span></div>
+            <div class="record-field"><label>Location</label><span>${escapeHtml(item.location)}</span></div>
+            <div class="record-field"><label>Condition</label><span>${escapeHtml(item.condition)}</span></div>
+            <div class="record-field"><label>Status</label><span class="badge ${statusClass(displayStatus)}">${escapeHtml(displayStatus)}</span></div>
+            <div class="record-field"><label>Registered Date</label><span>${escapeHtml(item.registeredAt || '—')}</span></div>
+            <div class="record-field"><label>Record Type</label><span>${item.archived ? 'Archived Record' : 'Active Record'}</span></div>
+            <div class="record-field full"><label>Photograph</label>${photo}</div>
+            <div class="record-field full"><label>Remarks</label><span>${escapeHtml(item.remarks || 'No remarks provided.')}</span></div>
+        </div>
+        <div class="record-actions">
+            <button class="btn secondary" type="button" onclick="closeEquipmentRecord()">Close</button>
+            ${requestButton}
+            ${adminAction}
+        </div>`;
+        document.getElementById('equipmentRecordOverlay').classList.add('show');
+    }
+
+    function requestEquipment(asset) {
+        const item = getInventoryRecords().find(record => record.asset === asset);
+        if (!item) {
+            showToast('Equipment record not found.');
+            return;
+        }
+        if (item.archived || item.status !== 'Available') {
+            showToast('This equipment is not currently available.');
+            return;
+        }
+        closeEquipmentRecord();
+        showSection('borrowForm');
+        const select = document.querySelector('#borrowRequestForm select');
+        if (!select) return;
+        let option = Array.from(select.options).find(o => o.value === item.name);
+        if (!option) {
+            option = document.createElement('option');
+            option.value = item.name;
+            option.textContent = item.name;
+            select.appendChild(option);
+        }
+        select.value = item.name;
+    }
+
+    function closeEquipmentRecord() {
+        document.getElementById('equipmentRecordOverlay').classList.remove('show');
+    }
+
+    function readEquipmentPhoto(file) {
+        return new Promise((resolve, reject) => {
+            if (!file) return resolve('');
+            if (!file.type.startsWith('image/')) return reject(new Error('Invalid image file.'));
+            if (file.size > 3 * 1024 * 1024) return reject(new Error('Photo must be 3MB or smaller.'));
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Could not read photo.'));
+            reader.readAsDataURL(file);
+        });
+    }
+
+    document.getElementById('equipmentForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const name = document.getElementById('eqName').value.trim();
+        const asset = document.getElementById('eqAsset').value.trim().toUpperCase();
+        const serial = document.getElementById('eqSerial').value.trim();
+        const category = document.getElementById('eqCategory').value;
+        const location = document.getElementById('eqLocation').value.trim();
+        const condition = document.getElementById('eqCondition').value;
+        const status = document.getElementById('eqStatus').value;
+        const remarks = document.getElementById('eqRemarks').value.trim();
+        const photoFile = document.getElementById('eqPhoto').files[0];
+        const records = getInventoryRecords();
+
+        if (records.some(item => item.asset.toLowerCase() === asset.toLowerCase())) {
+            showToast('Asset number already exists.');
+            return;
+        }
+
+        let photo = '';
+        try { photo = await readEquipmentPhoto(photoFile); }
+        catch (error) { showToast(error.message); return; }
+
+        records.push({ asset, name, serial, category, location, condition, status, photo, remarks, registeredAt: new Date().toISOString().slice(0,10), archived:false });
+        saveInventoryRecords(records);
+        this.reset();
+        renderInventory();
+        showToast(name + ' added to the equipment registry.');
+        showSection('inventory');
+    });
+
+    renderInventory();
+
+    document.getElementById('borrowRequestForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const fields = this.querySelectorAll('input, select, textarea');
+        const borrower = fields[0].value.trim();
+        const studentId = fields[1].value.trim();
+        const equipment = fields[2].value;
+        const purpose = fields[3].value.trim();
+        const borrowDate = fields[4].value;
+        const returnDate = fields[5].value;
+        const remarks = fields[6].value.trim();
+
+        const requests = getBorrowingRequests();
+        const nextNumber = requests.reduce((max, r) => {
+            const n = parseInt(String(r.id || '').replace('REQ-', ''), 10);
+            return Number.isFinite(n) ? Math.max(max, n) : max;
+        }, 1003) + 1;
+
+        requests.push({
+            id: 'REQ-' + nextNumber,
+            borrower: borrower,
+            ownerName: activeAccount ? activeAccount.name : borrower,
+            studentId: studentId,
+            equipment: equipment,
+            purpose: purpose,
+            borrowDate: borrowDate,
+            returnDate: returnDate,
+            remarks: remarks,
+            status: 'Pending'
+        });
+        saveBorrowingRequests(requests);
+        renderStudentDashboard();
+
+        showToast('Borrowing request submitted successfully.');
+        this.reset();
+        renderBorrowingRequests();
+        showSection('borrowing');
+    });
+
+    function csvCell(value) {
+        const text = String(value ?? '');
+        return '"' + text.replace(/"/g, '""') + '"';
+    }
+    function downloadCSV(type) {
+        let headers = [], rows = [];
+        if (type === 'inventory') {
+            headers = ['Asset No.','Equipment','Serial No.','Category','Location','Condition','Status','Archived','Registered Date','Remarks'];
+            rows = getInventoryRecords().map(x => [x.asset,x.name,x.serial,x.category,x.location,x.condition,x.status,x.archived ? 'Yes':'No',x.registeredAt,x.remarks]);
+        } else if (type === 'borrowing') {
+            headers = ['Request ID','Borrower','Student/Employee ID','Equipment','Purpose','Borrow Date','Return Date','Status','Remarks'];
+            rows = getBorrowingRequests().map(x => [x.id,x.borrower,x.studentId,x.equipment,x.purpose,x.borrowDate,x.returnDate,x.status,x.remarks]);
+        } else {
+            headers = ['Asset','Incident','Date','Cost','Status','Resolution','Reported By'];
+            rows = getMaintenanceRecords().map(x => [x.asset,x.incident,x.date,x.cost,x.status,x.resolution,x.reportedBy]);
+        }
+        const csv = [headers, ...rows].map(row => row.map(csvCell).join(',')).join('\r\n');
+        const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = type + '-report.csv'; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast(rows.length + ' record(s) exported.');
+    }
+
+    /* QR SCANNER FUNCTIONALITY (CAMERA & FILE UPLOAD) */
+    let qrCameraStream = null;
+    let qrScanFrame = null;
+    let qrHtml5Scanner = null;
+    let qrScannerClosing = false;
+
+    function createQRScannerOverlay() {
+        if (document.getElementById('qrScannerOverlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'qrScannerOverlay';
+        overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10000;align-items:center;justify-content:center;padding:18px;';
+        overlay.innerHTML = `
+            <div style="width:min(520px,100%);background:#fff;border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.35);">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">
+                    <div>
+                        <h2 style="color:var(--navy);margin-bottom:4px;">Scan Equipment QR</h2>
+                        <p class="muted">Point your phone camera at the QR code.</p>
+                    </div>
+                    <button type="button" class="close-register" onclick="stopQRScanner()">×</button>
+                </div>
+                <div id="qrScannerViewport" style="position:relative;width:100%;aspect-ratio:4/3;background:#111;border-radius:14px;overflow:hidden;">
+                    <video id="qrScannerVideo" playsinline autoplay muted style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+                    <div style="position:absolute;left:12%;right:12%;top:18%;bottom:18%;border:3px solid #fff;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.18);pointer-events:none;"></div>
+                </div>
+                <p id="qrScannerStatus" class="muted" style="text-align:center;margin:12px 0;">Starting camera...</p>
+                <div style="display:flex;gap:10px;">
+                    <button type="button" class="btn secondary" style="flex:1" onclick="stopQRScanner()">Close</button>
+                    <button type="button" class="btn" style="flex:1" onclick="switchQRCamera()">Switch Camera</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+    }
+
+    function setQRScannerStatus(message) {
+        const el = document.getElementById('qrScannerStatus');
+        if (el) el.textContent = message;
+    }
+
+    function startQRScanner() {
+        createQRScannerOverlay();
+        const overlay = document.getElementById('qrScannerOverlay');
+        overlay.style.display = 'flex';
+        qrScannerClosing = false;
+        setQRScannerStatus('Requesting camera access...');
+        startNativeQRCamera();
+    }
+
+    async function startNativeQRCamera() {
+        try {
+            stopQRCameraOnly();
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                setQRScannerStatus('Camera access is not supported by this browser.');
+                return;
+            }
+
+            qrCameraStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: 'environment' } },
+                audio: false
+            });
+
+            if (qrScannerClosing) { stopQRCameraOnly(); return; }
+
+            const video = document.getElementById('qrScannerVideo');
+            if (!video) return;
+
+            video.srcObject = qrCameraStream;
+            await video.play();
+
+            setQRScannerStatus('Camera is active. Point it at an equipment QR code.');
+
+            if ('BarcodeDetector' in window) {
+                const detector = new BarcodeDetector({ formats: ['qr_code'] });
+                scanWithBarcodeDetector(detector, video);
+            } else {
+                startHtml5QRDecoder();
+            }
+        } catch (error) {
+            console.error('QR camera error:', error);
+            setQRScannerStatus('Unable to start camera. Try uploading a QR image instead.');
+        }
+    }
+
+    async function scanWithBarcodeDetector(detector, video) {
+        if (qrScannerClosing || !qrCameraStream) return;
+        try {
+            const codes = await detector.detect(video);
+            if (codes && codes.length && codes[0].rawValue) {
+                handleQRScanResult(codes[0].rawValue);
+                return;
+            }
+        } catch (error) {}
+        qrScanFrame = requestAnimationFrame(() => scanWithBarcodeDetector(detector, video));
+    }
+
+    async function startHtml5QRDecoder() {
+        try {
+            if (!window.Html5Qrcode) return;
+            const scanner = new Html5Qrcode('qrScannerViewport');
+            qrHtml5Scanner = scanner;
+            stopQRCameraOnly();
+            await scanner.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                decodedText => handleQRScanResult(decodedText),
+                () => {}
+            );
+        } catch (error) {
+            setQRScannerStatus('Camera active. QR decoder unavailable.');
+        }
+    }
+
+    function handleQRScanResult(value) {
+        const scannedValue = String(value || '').trim();
+        if (!scannedValue) return;
+
+        stopQRScanner();
+
+        const qrAsset = document.getElementById('qrAsset');
+        if (qrAsset) qrAsset.value = scannedValue;
+
+        const item = getInventoryRecords().find(record =>
+            String(record.asset || '').trim().toLowerCase() === scannedValue.toLowerCase()
+        );
+
+        if (item) {
+            showToast('QR scanned: ' + item.asset);
+            viewItem(item.asset);
+        } else {
+            showToast('QR scanned: ' + scannedValue);
+            setTimeout(() => {
+                alert('QR code detected: ' + scannedValue + '\n\nNo matching equipment record was found.');
+            }, 100);
+        }
+    }
+
+    function stopQRCameraOnly() {
+        if (qrScanFrame) { cancelAnimationFrame(qrScanFrame); qrScanFrame = null; }
+        if (qrCameraStream) { qrCameraStream.getTracks().forEach(track => track.stop()); qrCameraStream = null; }
+        const video = document.getElementById('qrScannerVideo');
+        if (video) video.srcObject = null;
+    }
+
+    async function stopQRScanner() {
+        qrScannerClosing = true;
+        if (qrHtml5Scanner) {
+            try { await qrHtml5Scanner.stop(); } catch (e) {}
+            try { await qrHtml5Scanner.clear(); } catch (e) {}
+            qrHtml5Scanner = null;
+        }
+        stopQRCameraOnly();
+        const overlay = document.getElementById('qrScannerOverlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    function switchQRCamera() {
+        startNativeQRCamera();
+    }
+
+    // QR FILE UPLOAD HANDLER
+    async function handleQRFileUpload(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        showToast('Scanning uploaded QR image...');
+
+        try {
+            if ('BarcodeDetector' in window) {
+                const detector = new BarcodeDetector({ formats: ['qr_code'] });
+                const imageBitmap = await createImageBitmap(file);
+                const codes = await detector.detect(imageBitmap);
+                if (codes && codes.length && codes[0].rawValue) {
+                    handleQRScanResult(codes[0].rawValue);
+                    input.value = '';
+                    return;
+                }
+            }
+
+            if (window.Html5Qrcode) {
+                const html5QrCode = new Html5Qrcode("hiddenQrContainer");
+                const result = await html5QrCode.scanFile(file, true);
+                if (result) {
+                    handleQRScanResult(result);
+                    input.value = '';
+                    return;
+                }
+            }
+
+            showToast('No readable QR code found in the image.');
+        } catch (err) {
+            console.error('File scan error:', err);
+            showToast('Could not read QR code from the uploaded file.');
+        }
+        input.value = '';
+    }
+
+
+    function saveGeneratedQRImage() {
+        const qrBox = document.getElementById('qrBox');
+        const asset = document.getElementById('qrAsset')?.value.trim();
+        if (!qrBox || !asset) {
+            showToast('Please generate a QR code first.');
+            return;
+        }
+
+        const qrCanvas = qrBox.querySelector('canvas');
+        const qrImage = qrBox.querySelector('img');
+        const exportImage = (source) => {
+            const output = document.createElement('canvas');
+            output.width = 220;
+            output.height = 230;
+            const context = output.getContext('2d');
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, output.width, output.height);
+            context.drawImage(source, 20, 10, 180, 180);
+            context.fillStyle = '#111111';
+            context.font = 'bold 16px Arial';
+            context.textAlign = 'center';
+            context.fillText(asset, 110, 215);
+
+            const link = document.createElement('a');
+            link.download = (asset.replace(/[^a-z0-9_-]/gi, '_') || 'equipment-qr') + '.jpg';
+            link.href = output.toDataURL('image/jpeg', 0.95);
+            link.click();
+            showToast('QR image saved as JPG.');
+        };
+
+        if (qrCanvas) {
+            exportImage(qrCanvas);
+        } else if (qrImage) {
+            if (qrImage.complete) exportImage(qrImage);
+            else qrImage.onload = () => exportImage(qrImage);
+        } else {
+            showToast('Please generate the QR code again before saving.');
+        }
+    }
+
+    function generateQR() {
+        const assetInput = document.getElementById('qrAsset');
+        const qrBox = document.getElementById('qrBox');
+        if (!assetInput || !qrBox) return;
+
+        const asset = assetInput.value.trim();
+        if (!asset) {
+            showToast('Please enter an Asset Number.');
+            return;
+        }
+
+        function createQR() {
+            qrBox.innerHTML = '';
+            new QRCode(qrBox, { text: asset, width: 180, height: 180 });
+            const label = document.createElement('div');
+            label.style.marginTop = '10px';
+            label.style.fontWeight = '700';
+            label.textContent = asset;
+            qrBox.appendChild(label);
+            const saveButton = document.getElementById('saveQrImageBtn');
+            if (saveButton) saveButton.style.display = 'inline-block';
+            showToast('Equipment QR generated successfully.');
+        }
+
+        if (window.QRCode) { createQR(); return; }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+        script.onload = createQR;
+        document.head.appendChild(script);
+    }
+
+
+    /* E-QUIP FUNCTIONALITY EXTENSION
+       Deliberately does not modify authentication or the equipAccounts storage key. */
+    const EQUIP_TX_KEY = 'equipTransactions';
+    const EQUIP_MAINT_KEY = 'equipMaintenanceRecords';
+    const EQUIP_NOTIF_KEY = 'equipNotifications';
+    const EQUIP_SETTINGS_KEY = 'equipSystemSettings';
+    function readArray(key) { try { const v = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(v) ? v : []; } catch (_) { return []; } }
+    function writeArray(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+    function getMaintenanceRecords() { return readArray(EQUIP_MAINT_KEY); }
+    function saveMaintenanceRecords(v) { writeArray(EQUIP_MAINT_KEY, v); }
+    function getTransactions() { return readArray(EQUIP_TX_KEY); }
+    function saveTransactions(v) { writeArray(EQUIP_TX_KEY, v); }
+    function getNotifications() { return readArray(EQUIP_NOTIF_KEY); }
+    function addEquipNotification(title, message) {
+        const list = getNotifications();
+        list.unshift({id:'NTF-' + Date.now(), title, message, date:new Date().toLocaleString(), read:false});
+        writeArray(EQUIP_NOTIF_KEY, list.slice(0,250));
+        renderNotifications();
+    }
+    function markAllNotificationsRead() {
+        const list = getNotifications().map(n => ({...n, read:true}));
+        writeArray(EQUIP_NOTIF_KEY, list); renderNotifications(); showToast('All notifications marked as read.');
+    }
+    function renderNotifications() {
+        const body = document.getElementById('notificationsBody'); if (!body) return;
+        const list = getNotifications(); body.innerHTML = '';
+        if (!list.length) { body.innerHTML = '<tr><td colspan="3" class="muted" style="text-align:center;padding:20px">No notifications yet.</td></tr>'; return; }
+        list.forEach(n => { const tr=document.createElement('tr'); if (!n.read) tr.style.fontWeight='700';
+            const icon=document.createElement('td'); icon.textContent=n.read?'✓':'🔔';
+            const content=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=n.title||'Notification'; const small=document.createElement('div'); small.className='muted'; small.textContent=n.message||''; content.append(strong,small);
+            const date=document.createElement('td'); date.textContent=n.date||''; tr.append(icon,content,date); body.appendChild(tr);
+        });
+    }
+    function modifyEquipment(asset) {
+    if (!activeAccount || activeAccount.role !== 'Administrator') {
+        showToast('Only the Administrator can modify equipment.');
+        return;
+    }
+
+    const records = getInventoryRecords();
+    const item = records.find(x => x.asset === asset);
+
+    if (!item) {
+        showToast('Equipment not found.');
+        return;
+    }
+
+    const categoryOptions = ['Computer', 'Projector', 'Camera', 'Laboratory', 'Sports'];
+    const conditionOptions = ['Good', 'Fair', 'Needs Repair'];
+    const statusOptions = ['Available', 'Borrowed', 'Maintenance'];
+
+    function makeOptions(options, current) {
+        if (current && !options.includes(current)) {
+            options.push(current);
+        }
+
+        return options.map(value =>
+            `<option value="${escapeHtml(value)}" ${value === current ? 'selected' : ''}>${escapeHtml(value)}</option>`
+        ).join('');
+    }
+
+    document.getElementById('recordContent').innerHTML = `
+        <form id="modifyEquipmentForm">
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Equipment Name</label>
+                    <input id="modifyName" value="${escapeHtml(item.name)}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Asset Number</label>
+                    <input value="${escapeHtml(item.asset)}" readonly disabled>
+                    <small class="muted">Asset Number cannot be changed.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Serial Number</label>
+                    <input id="modifySerial" value="${escapeHtml(item.serial || '')}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="modifyCategory" required>
+                        ${makeOptions(categoryOptions, item.category)}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Location</label>
+                    <input id="modifyLocation" value="${escapeHtml(item.location || '')}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Condition</label>
+                    <select id="modifyCondition" required>
+                        ${makeOptions(conditionOptions, item.condition)}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="modifyStatus" required>
+                        ${makeOptions(statusOptions, item.status)}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Registered Date</label>
+                    <input value="${escapeHtml(item.registeredAt || '')}" readonly disabled>
+                    <small class="muted">Original registration date is preserved.</small>
+                </div>
+
+                <div class="form-group full">
+                    <label>Equipment Photograph</label>
+                    ${item.photo
+                        ? `<img src="${item.photo}" style="max-width:180px;max-height:150px;object-fit:contain;display:block;margin-bottom:10px;border-radius:8px;">`
+                        : '<p class="muted">No photograph uploaded.</p>'
+                    }
+                    <input id="modifyPhoto" type="file" accept="image/*">
+                    <small class="muted">Upload a new photo to replace the existing one. Leave empty to keep the current photo.</small>
+                </div>
+
+                <div class="form-group full">
+                    <label>Remarks</label>
+                    <textarea id="modifyRemarks">${escapeHtml(item.remarks || '')}</textarea>
+                </div>
+
+                <div class="full">
+                    <button class="btn" type="submit">Save Changes</button>
+                    <button class="btn secondary" type="button" onclick="viewItem('${escapeHtml(item.asset)}')">Cancel</button>
+                </div>
+
+            </div>
+        </form>
+    `;
+
+    document.getElementById('recordTitle').textContent = 'Modify Equipment';
+    document.getElementById('recordSubtitle').textContent =
+        item.asset + ' • Edit Equipment Information';
+
+    document.getElementById('modifyEquipmentForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById('modifyName').value.trim();
+        const serial = document.getElementById('modifySerial').value.trim();
+        const category = document.getElementById('modifyCategory').value;
+        const location = document.getElementById('modifyLocation').value.trim();
+        const condition = document.getElementById('modifyCondition').value;
+        const status = document.getElementById('modifyStatus').value;
+        const remarks = document.getElementById('modifyRemarks').value.trim();
+        const photoFile = document.getElementById('modifyPhoto').files[0];
+
+        if (!name || !serial || !location) {
+            showToast('Please complete all required fields.');
+            return;
+        }
+
+        if (records.some(x =>
+            x !== item &&
+            (x.serial || '').toLowerCase() === serial.toLowerCase()
+        )) {
+            showToast('Serial number already exists.');
+            return;
+        }
+
+        let photo = item.photo || '';
+
+        try {
+            if (photoFile) {
+                photo = await readEquipmentPhoto(photoFile);
+            }
+        } catch (error) {
+            showToast(error.message);
+            return;
+        }
+
+        Object.assign(item, {
+            name,
+            serial,
+            category,
+            location,
+            condition,
+            status,
+            remarks,
+            photo
+        });
+
+        saveInventoryRecords(records);
+        renderInventory();
+        closeEquipmentRecord();
+        viewItem(asset);
+
+        showToast('Equipment record updated successfully.');
+    });
+}
+    function deleteEquipment(asset) {
+        if (!activeAccount || activeAccount.role !== 'Administrator') return showToast('Only the Administrator can archive equipment.');
+        const records=getInventoryRecords(), item=records.find(x=>x.asset===asset); if(!item) return showToast('Equipment not found.');
+        if(item.status==='Borrowed') return showToast('Cannot archive equipment while it is borrowed.');
+        if(!confirm('Archive '+item.name+'? The record will be retained and can be viewed under Show Archived.')) return;
+        item.archived=true; item.archivedAt=new Date().toISOString(); saveInventoryRecords(records);
+        closeEquipmentRecord(); renderInventory(); showToast('Equipment archived. The record was not permanently deleted.');
+    }
+    function nextId(prefix, list, field) { const nums=list.map(x=>parseInt(String(x[field]||'').replace(prefix,''),10)).filter(Number.isFinite); return prefix+(Math.max(0,...nums)+1); }
+    function renderTransactions() {
+        const body=document.getElementById('transactionsBody'); if(!body) return;
+        const requests=getBorrowingRequests(); const saved=getTransactions();
+        const released=requests.filter(r=>['Released','Overdue'].includes(r.status));
+        body.innerHTML='';
+        const rows=[...saved];
+        released.forEach(r=>{ if(!rows.some(t=>t.requestId===r.id)) rows.push({id:'',requestId:r.id,borrower:r.borrower,equipment:r.equipment,issuedBy:r.issuedBy||'—',schedule:(r.borrowDate||'')+' – '+(r.returnDate||''),actualReturn:r.actualReturn||'—',status:r.status}); });
+        if(!rows.length) { body.innerHTML='<tr><td colspan="7" class="muted" style="text-align:center;padding:20px">No release or return transactions yet.</td></tr>'; return; }
+        rows.slice().reverse().forEach(t=>{ const tr=document.createElement('tr');
+            [t.id||t.requestId,t.borrower,t.equipment,t.issuedBy||'—',t.schedule||'',t.actualReturn||'—',t.status||''].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td);});
+            if(t.status==='Released'||t.status==='Overdue'){const td=document.createElement('td');const b=document.createElement('button');b.className='btn green';b.textContent='Record Return';b.onclick=()=>returnTransaction(t.requestId);td.appendChild(b);tr.appendChild(td);} body.appendChild(tr);
+        });
+    }
+    function releaseTransaction(requestId) {
+        if(!activeAccount || !['Administrator','Inventory / Maintenance Staff'].includes(activeAccount.role)) return showToast('You do not have permission to release equipment.');
+        const requests=getBorrowingRequests(), r=requests.find(x=>x.id===requestId); if(!r) return showToast('Saved borrowing request not found.');
+        if(r.status!=='Approved') return showToast('Only approved requests can be released.');
+        const item=getInventoryRecords().find(x=>x.name.toLowerCase()===String(r.equipment).toLowerCase()&&!x.archived);
+        if(item && item.status!=='Available' && item.status!=='Borrowed') return showToast('Equipment is not available for release.');
+        r.status='Released'; r.issuedBy=activeAccount.name; r.releasedAt=new Date().toISOString(); saveBorrowingRequests(requests);
+        const tx=getTransactions(); tx.push({id:nextId('TRX-',tx,'id'),requestId:r.id,borrower:r.borrower,equipment:r.equipment,issuedBy:activeAccount.name,schedule:(r.borrowDate||'')+' – '+(r.returnDate||''),actualReturn:'—',status:'Released',releasedAt:r.releasedAt}); saveTransactions(tx);
+        syncInventoryWithBorrowingRequests(); renderInventory(); renderBorrowingRequests(); renderTransactions(); renderStudentDashboard();
+        addEquipNotification('Equipment released',r.equipment+' was released to '+r.borrower+'.'); showToast('Release transaction recorded.');
+    }
+    function returnTransaction(requestId) {
+        if(!activeAccount || !['Administrator','Inventory / Maintenance Staff'].includes(activeAccount.role)) return showToast('You do not have permission to record returns.');
+        const requests=getBorrowingRequests(), r=requests.find(x=>x.id===requestId); if(!r || !['Released','Overdue'].includes(r.status)) return showToast('No active release found for this request.');
+        const actual=prompt('Actual return date (YYYY-MM-DD):',new Date().toISOString().slice(0,10)); if(actual===null) return;
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(actual)) return showToast('Please use YYYY-MM-DD format.');
+        const condition=prompt('Returned equipment condition (Good, Fair, Needs Repair):','Good'); if(condition===null) return;
+        r.status='Returned'; r.actualReturn=actual; r.returnCondition=condition; r.returnedAt=new Date().toISOString(); saveBorrowingRequests(requests);
+        const tx=getTransactions(), t=tx.find(x=>x.requestId===requestId); if(t){t.actualReturn=actual;t.returnCondition=condition;t.status='Returned';} saveTransactions(tx);
+        const inv=getInventoryRecords(), item=inv.find(x=>x.name.toLowerCase()===String(r.equipment).toLowerCase()&&!x.archived);
+        if(item){item.status=condition==='Needs Repair'?'Maintenance':'Available';item.condition=condition;saveInventoryRecords(inv);}
+        renderInventory();renderBorrowingRequests();renderTransactions();renderStudentDashboard();
+        addEquipNotification('Equipment returned',r.equipment+' was returned by '+r.borrower+'.'); showToast('Return transaction recorded.');
+    }
+    function renderMaintenance() {
+        const body=document.getElementById('maintenanceBody'); if(!body) return; const rows=getMaintenanceRecords(); body.innerHTML='';
+        if(!rows.length){body.innerHTML='<tr><td colspan="6" class="muted" style="text-align:center;padding:20px">No maintenance records yet.</td></tr>';return;}
+        rows.slice().reverse().forEach(x=>{const tr=document.createElement('tr');[x.asset,x.incident,x.date,'₱'+(x.cost||0),x.status,x.resolution||'—'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td);});body.appendChild(tr);});
+    }
+    function recordIncident() {
+        if(!activeAccount || !['Administrator','Inventory / Maintenance Staff'].includes(activeAccount.role)) return showToast('You do not have permission to record incidents.');
+        const inventory=getInventoryRecords().filter(x=>!x.archived); if(!inventory.length) return showToast('Register equipment first.');
+        const asset=prompt('Enter equipment Asset Number:\n'+inventory.map(x=>x.asset+' — '+x.name).join('\n')); if(!asset) return;
+        const item=inventory.find(x=>x.asset.toLowerCase()===asset.trim().toLowerCase()); if(!item) return showToast('Asset number not found.');
+        const incident=prompt('Describe the damage or incident:'); if(!incident||!incident.trim()) return;
+        const cost=prompt('Estimated/actual cost (number only):','0'); if(cost===null||!Number.isFinite(Number(cost))||Number(cost)<0) return showToast('Enter a valid cost.');
+        const status=prompt('Status (Under Repair, Pending, Resolved):','Under Repair'); if(!status) return;
+        const resolution=prompt('Resolution / action taken:',''); if(resolution===null) return;
+        const rows=getMaintenanceRecords(); rows.push({id:nextId('MNT-',rows,'id'),asset:item.asset+' '+item.name,assetNumber:item.asset,incident:incident.trim(),date:new Date().toISOString().slice(0,10),cost:Number(cost),status:status.trim(),resolution:resolution.trim(),reportedBy:activeAccount.name}); saveMaintenanceRecords(rows);
+        if(status.trim()!=='Resolved'){const inv=getInventoryRecords();const target=inv.find(x=>x.asset===item.asset);if(target){target.status='Maintenance';target.condition='Needs Repair';saveInventoryRecords(inv);}}
+        renderMaintenance();renderInventory();addEquipNotification('Maintenance incident recorded',item.name+': '+incident.trim());showToast('Maintenance record saved.');
+    }
+    function generateOverdueReport() {
+        const today=new Date();today.setHours(0,0,0,0);
+        const overdue=getBorrowingRequests().filter(r=>['Released','Overdue'].includes(r.status) && r.returnDate && new Date(r.returnDate+'T00:00:00')<today);
+        overdue.forEach(r=>{if(r.status!=='Overdue')r.status='Overdue';}); saveBorrowingRequests(getBorrowingRequests().map(r=>{const found=overdue.find(o=>o.id===r.id);return found?{...r,status:'Overdue'}:r;}));
+        renderBorrowingRequests();renderTransactions();renderStudentDashboard();
+        const csv=[['Request ID','Borrower','Equipment','Borrow Date','Due Date','Status'],...overdue.map(r=>[r.id,r.borrower,r.equipment,r.borrowDate,r.returnDate,'Overdue'])].map(row=>row.map(csvCell).join(',')).join('\r\n');
+        const a=document.createElement('a'),url=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.href=url;a.download='overdue-report.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+        showToast(overdue.length+' overdue record(s) exported.');
+    }
+    function printQRLabel() {
+        const box = document.getElementById('qrBox');
+        const asset = document.getElementById('qrAsset')?.value.trim();
+        if (!box || !asset || !box.querySelector('canvas, img')) return showToast('Generate a QR code first.');
+        const popup = window.open('', '_blank', 'width=420,height=520');
+        if (!popup) return showToast('Allow pop-ups to print the QR label.');
+        const sourceImage = box.querySelector('canvas')?.toDataURL('image/png') || box.querySelector('img')?.src;
+        const doc = popup.document;
+        doc.title = 'QR Label';
+        doc.body.style.fontFamily = 'Arial';
+        doc.body.style.textAlign = 'center';
+        doc.body.style.padding = '24px';
+        const image = doc.createElement('img');
+        image.src = sourceImage;
+        image.style.width = '220px';
+        image.style.height = '220px';
+        const heading = doc.createElement('h2');
+        heading.textContent = asset;
+        doc.body.appendChild(image);
+        doc.body.appendChild(heading);
+        popup.onload = () => popup.print();
+    }
+    function sendBorrowingReminder(button) {
+        const row=button?.closest('tr');const id=row?.cells[0]?.textContent.trim();const r=getBorrowingRequests().find(x=>x.id===id);
+        if(r){addEquipNotification('Borrowing reminder', 'Reminder: '+r.borrower+' — '+r.equipment+' is due '+(r.returnDate||'on the scheduled date')+'.');showToast('Reminder saved as a system notification. No email or SMS was sent.');}
+        else showToast('This sample request is not linked to a saved borrower account.');
+    }
+    function saveSystemSettings() {
+        if(!activeAccount || activeAccount.role!=='Administrator') return showToast('Only the Administrator can change settings.');
+        const settings={systemName:document.getElementById('settingSystemName').value.trim(),reminderDays:Number(document.getElementById('settingReminderDays').value),schoolEmail:document.getElementById('settingSchoolEmail').value.trim()};
+        if(!settings.systemName||!settings.schoolEmail||!Number.isInteger(settings.reminderDays)||settings.reminderDays<0) return showToast('Please check the settings values.');
+        localStorage.setItem(EQUIP_SETTINGS_KEY,JSON.stringify(settings));showToast('Settings saved successfully.');
+    }
+    function loadSystemSettings() {
+        try{const s=JSON.parse(localStorage.getItem(EQUIP_SETTINGS_KEY)||'null');if(!s)return; if(s.systemName)document.getElementById('settingSystemName').value=s.systemName;if(Number.isInteger(s.reminderDays))document.getElementById('settingReminderDays').value=s.reminderDays;if(s.schoolEmail)document.getElementById('settingSchoolEmail').value=s.schoolEmail;}catch(_){}
+    }
+    // Add release controls to saved approved requests without changing the request/account schema.
+    const _renderBorrowingRequestsOriginal = renderBorrowingRequests;
+    renderBorrowingRequests = function() {
+        _renderBorrowingRequestsOriginal();
+        const body=document.getElementById('requestBody'); if(!body || (activeAccount && activeAccount.role==='Faculty / Staff / Student')) return;
+        Array.from(body.rows).forEach(row=>{const id=row.cells[0]?.textContent.trim();const req=getBorrowingRequests().find(x=>x.id===id);if(!req)return;const cell=row.cells[row.cells.length-1];if(!cell)return;
+            if(req.status==='Approved'){const b=document.createElement('button');b.className='btn green';b.textContent='Release';b.onclick=()=>releaseTransaction(req.id);cell.appendChild(b);}
+            else if(['Released','Overdue'].includes(req.status)){const b=document.createElement('button');b.className='btn orange';b.textContent='Return';b.onclick=()=>returnTransaction(req.id);cell.appendChild(b);}
+        });
+    };
+    // Keep dashboards and data views synchronized whenever a section is opened.
+    const _showSectionOriginal = showSection;
+    showSection = function(id){_showSectionOriginal(id);if(id==='transactions')renderTransactions();if(id==='maintenance')renderMaintenance();if(id==='notifications')renderNotifications();if(id==='settings')loadSystemSettings();if(id==='dashboard')refreshDashboardStats();};
+    function refreshDashboardStats(){
+        const inv=getInventoryRecords().filter(x=>!x.archived), req=getBorrowingRequests();
+        const counts={total:inv.length,available:inv.filter(x=>x.status==='Available').length,borrowed:inv.filter(x=>x.status==='Borrowed').length,overdue:req.filter(x=>x.status==='Overdue').length};
+        [['totalCount',counts.total],['availableCount',counts.available],['borrowedCount',counts.borrowed],['overdueCount',counts.overdue]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+        const statusRows=document.querySelectorAll('#studentEquipmentStatusCard tbody tr');const vals=[counts.available,counts.borrowed,inv.filter(x=>x.status==='Maintenance').length,inv.filter(x=>/lost|damaged/i.test(x.condition||'')).length];statusRows.forEach((r,i)=>{if(r.cells[1])r.cells[1].textContent=vals[i]??0;});
+        const recent=document.querySelector('#dashboard .grid-2 .card:first-child tbody');
+        if(recent && (!activeAccount || activeAccount.role!=='Faculty / Staff / Student')) {
+            const recentRequests=req.slice().reverse().slice(0,5); recent.innerHTML='';
+            if(!recentRequests.length) recent.innerHTML='<tr><td colspan="4" class="muted" style="text-align:center;padding:20px">No saved borrowing requests yet.</td></tr>';
+            recentRequests.forEach(r=>{const tr=document.createElement('tr');[r.borrower||'',r.equipment||'',r.borrowDate||'',r.status||'Pending'].forEach((v,i)=>{const td=document.createElement('td');if(i===3){const badge=document.createElement('span');badge.className='badge '+(v==='Approved'||v==='Returned'?'approved':v==='Overdue'?'overdue':'pending');badge.textContent=v;td.appendChild(badge);}else td.textContent=v;tr.appendChild(td);});recent.appendChild(tr);});
+        }
+    }
+    // Initial render for newly functional modules.
+    renderTransactions();renderMaintenance();renderNotifications();loadSystemSettings();refreshDashboardStats();
+
+</script>
+</body>
+</html>
