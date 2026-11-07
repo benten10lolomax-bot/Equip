@@ -218,36 +218,16 @@
         <h1>E-QUIP</h1>
         <p class="subtitle">School Equipment Borrowing and Inventory System</p>
         <form id="loginForm">
-    <div class="form-group">
-        <label>Email</label>
-        <input
-            id="loginUser"
-            type="email"
-            placeholder="Enter your email"
-            required
-        >
-    </div>
-
-    <div class="form-group">
-        <label>Password</label>
-        <div style="position:relative">
-            <input
-                id="loginPass"
-                type="password"
-                placeholder="Enter your password"
-                required
-                style="padding-right:65px"
-            >
-            <button
-                type="button"
-                onclick="toggleLoginPassword()"
-                style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#2563eb;font-weight:700;cursor:pointer"
-            >Show</button>
-        </div>
-    </div>
-
-    <button class="primary-btn" type="submit">Sign In</button>
-</form>
+            <div class="form-group">
+                <label>Email</label>
+                <input id="loginUser" type="email" placeholder="Enter your email" autocomplete="username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <div style="position:relative"><input id="loginPass" type="password" placeholder="Enter your password" autocomplete="current-password" required style="padding-right:65px"><button type="button" onclick="toggleLoginPassword()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#2563eb;font-weight:700;cursor:pointer">Show</button></div>
+            </div>
+            <button class="primary-btn" type="submit">Sign In</button>
+        </form>
         <p class="register-link" onclick="openRegister()">Create Account</p>
     </div>
 </div>
@@ -517,10 +497,10 @@
 
             <!-- USERS -->
             <section class="section" id="users">
-                <div class="card-header"><div><h2>User Management</h2><p class="muted">Manage system users, roles, and permissions.</p></div><button class="btn" onclick="openRegister()">+ Add User</button></div>
+                <div class="card-header"><div><h2>User Management</h2><p class="muted">Account details for the currently signed-in user. Passwords are managed securely by Supabase and are never viewable here.</p></div></div>
                 <div class="card">
                     <table>
-                        <thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Role</th><th>Password</th><th>Status</th><th>Action</th></tr></thead>
+                        <thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Role</th><th>Status</th></tr></thead>
                         <tbody id="usersTableBody"></tbody>
                     </table>
                 </div>
@@ -553,10 +533,8 @@
             <div class="form-group"><label>Username</label><input id="regUser" type="text" placeholder="Choose username" required></div>
             <div class="form-group"><label>Role</label>
                 <select id="regRole" required>
-    <option value="Faculty / Staff / Student">
-        Faculty / Staff / Student
-    </option>
-</select>
+                    <option value="Faculty / Staff / Student">Faculty / Staff / Student</option>
+                </select>
             </div>
             <div class="form-group"><label>Password</label><input id="regPass" type="password" minlength="6" placeholder="At least 6 characters" required></div>
             <div class="form-group"><label>Confirm Password</label><input id="regConfirm" type="password" minlength="6" placeholder="Confirm password" required></div>
@@ -573,17 +551,12 @@
 <!-- HIDDEN HTML5 QR DECODER CONTAINER FOR FILE UPLOAD SCANNING -->
 <div id="hiddenQrContainer" style="display:none;"></div>
 
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-   const SUPABASE_URL = 'https://ujkskvlwuqmmdgalzxkm.supabase.co';
+    const SUPABASE_URL = 'https://ujkskvlwuqmmdgalzxkm.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_fCuB5FYS_2w47LcgUzOOcg_upDV4lqD';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_fCuB5FYS_2w47LcgUzOOcg_upDV4lqD';
-
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-);
     const titles = {
         dashboard: "Dashboard",
         inventory: "Equipment Inventory",
@@ -905,47 +878,66 @@ const supabaseClient = window.supabase.createClient(
         btn.addEventListener('click', () => showSection(btn.dataset.section));
     });
 
-    const DEFAULT_ACCOUNT = {
-        name: 'System Administrator',
-        email: 'admin@equip.edu',
-        username: 'admin',
-        role: 'Administrator',
-        password: 'admin123'
+    // Supabase authentication replaces the old localStorage account/password system.
+    const SUPABASE_ROLE_LABELS = {
+        admin: 'Administrator',
+        inventory_maintenance: 'Inventory / Maintenance Staff',
+        faculty_staff_student: 'Faculty / Staff / Student'
     };
-    const ACCOUNTS_KEY = 'equipAccounts';
 
-    function getAccounts() {
-        try {
-            const raw = localStorage.getItem(ACCOUNTS_KEY);
-            if (!raw) {
-                const initial = [DEFAULT_ACCOUNT];
-                localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(initial));
-                return initial;
-            }
-            const saved = JSON.parse(raw);
-            if (!Array.isArray(saved)) throw new Error('Invalid accounts data');
-
-            if (!saved.some(a => String(a.username).toLowerCase() === 'admin')) {
-                saved.unshift(DEFAULT_ACCOUNT);
-                localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(saved));
-            }
-            return saved;
-        } catch (error) {
-            const initial = [DEFAULT_ACCOUNT];
-            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(initial));
-            return initial;
-        }
+    function toEquipAccount(user, profile) {
+        const roleLabel = SUPABASE_ROLE_LABELS[profile.role];
+        if (!roleLabel) throw new Error('This account has an unrecognized role.');
+        return {
+            id: user.id,
+            name: profile.full_name || user.email || 'E-QUIP User',
+            email: user.email || '',
+            username: profile.username || '',
+            role: roleLabel
+        };
     }
 
-    let accounts = getAccounts();
+    async function loadSupabaseProfile(user) {
+        const { data: profile, error } = await supabaseClient
+            .from('profiles')
+            .select('full_name, username, role')
+            .eq('id', user.id)
+            .single();
 
-    function saveAccounts() {
-        localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+        if (error || !profile) {
+            throw new Error('Your account profile could not be loaded. Please contact the system administrator.');
+        }
+
+        activeAccount = toEquipAccount(user, profile);
+        updateSignedInUI();
+        return activeAccount;
+    }
+
+    function updateSignedInUI() {
+        if (!activeAccount) return;
+
+        document.getElementById('userDisplay').textContent = activeAccount.name;
+        const profileRole = document.querySelector('.profile small');
+        if (profileRole) profileRole.textContent = activeAccount.role;
+
+        const avatar = document.querySelector('.profile .avatar');
+        if (avatar) {
+            avatar.textContent = String(activeAccount.name || 'EQ')
+                .split(/\s+/).filter(Boolean).slice(0, 2)
+                .map(part => part.charAt(0).toUpperCase()).join('');
+        }
+
+        applyRoleAccess();
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        renderUsers();
     }
 
     function openRegister() {
         document.getElementById('registerOverlay').style.display = 'flex';
         document.getElementById('registerForm').reset();
+        const roleSelect = document.getElementById('regRole');
+        if (roleSelect) roleSelect.value = 'Faculty / Staff / Student';
     }
 
     function closeRegister() {
@@ -953,18 +945,22 @@ const supabaseClient = window.supabase.createClient(
         document.getElementById('registerForm').reset();
     }
 
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
+        const submitButton = this.querySelector('button[type="submit"]');
         const name = document.getElementById('regName').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
+        const email = document.getElementById('regEmail').value.trim().toLowerCase();
         const username = document.getElementById('regUser').value.trim();
-        const role = document.getElementById('regRole').value;
         const password = document.getElementById('regPass').value;
         const confirm = document.getElementById('regConfirm').value;
 
-        if (!name || !email || !username || !role || !password) {
+        if (!name || !email || !username || !password) {
             showToast('Please complete all fields.');
+            return;
+        }
+        if (!/^[a-zA-Z0-9_.-]{3,30}$/.test(username)) {
+            showToast('Username must be 3–30 characters and use only letters, numbers, dot, underscore, or hyphen.');
             return;
         }
         if (password !== confirm) {
@@ -975,55 +971,88 @@ const supabaseClient = window.supabase.createClient(
             showToast('Password must be at least 6 characters.');
             return;
         }
-        if (accounts.some(a => a.username.toLowerCase() === username.toLowerCase())) {
-            showToast('Username already exists.');
-            return;
-        }
-        if (accounts.some(a => a.email.toLowerCase() === email.toLowerCase())) {
-            showToast('Email is already registered.');
-            return;
+
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Creating account...';
         }
 
-        const newAccount = { name, email, username, role, password };
-        accounts.push(newAccount);
-        saveAccounts();
+        try {
+            // Never send a role from the browser. The database trigger assigns the default role.
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: name,
+                        username: username
+                    }
+                }
+            });
 
-        closeRegister();
-        document.getElementById('loginUser').value = username;
-        document.getElementById('loginPass').value = password;
-        document.getElementById('loginRole').value = role;
-        renderUsers();
-        showToast('Account created and saved successfully.');
+            if (error) {
+                const message = /duplicate key|unique constraint/i.test(error.message)
+                    ? 'That username is already in use. Please choose another.'
+                    : error.message;
+                throw new Error(message);
+            }
+
+            closeRegister();
+
+            if (data.session && data.user) {
+                await loadSupabaseProfile(data.user);
+                showToast('Account created successfully. Welcome, ' + (activeAccount?.name || name) + '!');
+            } else {
+                showToast('Registration received. Check your email to confirm your account, then sign in.');
+                document.getElementById('loginUser').value = email;
+                document.getElementById('loginPass').value = '';
+            }
+        } catch (error) {
+            console.error('Supabase registration error:', error);
+            showToast(error.message || 'Could not create the account. Please try again.');
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Create Account';
+            }
+        }
     });
 
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        accounts = getAccounts();
-
-        const username = document.getElementById('loginUser').value.trim();
+        const submitButton = this.querySelector('button[type="submit"]');
+        const email = document.getElementById('loginUser').value.trim().toLowerCase();
         const password = document.getElementById('loginPass').value;
-        const role = document.getElementById('loginRole').value;
-        const account = accounts.find(a =>
-            a.username.toLowerCase() === username.toLowerCase() &&
-            a.password === password &&
-            a.role === role
-        );
 
-        if (!account) {
-            showToast('Invalid username, password, or role.');
-            return;
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Signing in...';
         }
 
-        activeAccount = account;
-        document.getElementById('userDisplay').textContent = account.name;
-        document.querySelector('.profile small').textContent = account.role;
-        applyRoleAccess();
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        showToast('Welcome, ' + account.name + '!');
+        try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email,
+                password
+            });
 
-        if (document.getElementById('users')) renderUsers();
+            if (error) throw error;
+            if (!data.user) throw new Error('Supabase did not return a signed-in user.');
+
+            await loadSupabaseProfile(data.user);
+            showToast('Welcome, ' + activeAccount.name + '!');
+        } catch (error) {
+            console.error('Supabase login error:', error);
+            const message = /email not confirmed/i.test(error.message)
+                ? 'Please confirm your email before signing in.'
+                : (error.message || 'Unable to sign in. Check your email and password.');
+            showToast(message);
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Sign In';
+            }
+        }
     });
 
     function toggleLoginPassword() {
@@ -1038,102 +1067,77 @@ const supabaseClient = window.supabase.createClient(
             toggleButton.setAttribute('aria-pressed', shouldShow ? 'true' : 'false');
         }
     }
-    // Explicitly expose the handler for the existing inline button action.
     window.toggleLoginPassword = toggleLoginPassword;
 
-    document.getElementById('logoutBtn').addEventListener('click', function() {
-        accounts = getAccounts();
+    document.getElementById('logoutBtn').addEventListener('click', async function() {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+            showToast('Could not sign out. Please try again.');
+            return;
+        }
+
         activeAccount = null;
         document.getElementById('app').style.display = 'none';
         document.getElementById('loginPage').style.display = 'flex';
         document.querySelector('.register-link').style.display = '';
         document.getElementById('loginForm').reset();
-        showToast('Logged out. Your account is still saved.');
+        showToast('You have been signed out.');
     });
 
     function renderUsers() {
         const tbody = document.getElementById('usersTableBody');
         if (!tbody) return;
-        const isAdmin = activeAccount && activeAccount.role === 'Administrator';
-        tbody.innerHTML = accounts.map((account, index) => {
-            const passwordCell = isAdmin
-                ? `<div style="display:flex;gap:6px;align-items:center;min-width:150px">
-                     <input id="userPass_${index}" type="password" value="${escapeHtml(account.password)}" readonly style="max-width:120px;padding:7px">
-                     <button class="btn secondary" type="button" onclick="toggleUserPassword(${index})" title="Show/Hide password">👁️</button>
-                   </div>`
-                : '<span class="muted">Hidden</span>';
-            const actionCell = isAdmin
-                ? `<button class="btn secondary" type="button" onclick="openManageUser(${index})">Manage</button>`
-                : '<span class="muted">—</span>';
-            return `
-                <tr>
-                    <td>${escapeHtml(account.name)}</td>
-                    <td>${escapeHtml(account.email)}</td>
-                    <td>${escapeHtml(account.username)}</td>
-                    <td>${escapeHtml(account.role)}</td>
-                    <td>${passwordCell}</td>
-                    <td><span class="badge available">Active</span></td>
-                    <td>${actionCell}</td>
-                </tr>`;
-        }).join('');
-    }
 
-    function toggleUserPassword(index) {
-        if (!activeAccount || activeAccount.role !== 'Administrator') {
-            showToast('Only the Administrator can view passwords.');
+        if (!activeAccount) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center" class="muted">Sign in to view your account details.</td></tr>';
             return;
         }
-        const input = document.getElementById('userPass_' + index);
-        if (!input) return;
-        input.type = input.type === 'password' ? 'text' : 'password';
+
+        tbody.innerHTML = `
+            <tr>
+                <td>${escapeHtml(activeAccount.name)}</td>
+                <td>${escapeHtml(activeAccount.email)}</td>
+                <td>${escapeHtml(activeAccount.username || '—')}</td>
+                <td>${escapeHtml(activeAccount.role)}</td>
+                <td><span class="badge available">Active</span></td>
+            </tr>`;
     }
 
-    let managedUserIndex = null;
+    // Passwords and role changes are intentionally not editable in browser-side JavaScript.
+    // User listing and administrator-only role assignment need a separate secured backend RPC.
+    function toggleUserPassword() {
+        showToast('Passwords are securely managed by Supabase and cannot be viewed.');
+    }
 
-    function openManageUser(index) {
-        if (!activeAccount || activeAccount.role !== 'Administrator') {
-            showToast('Only the Administrator can manage users.');
-            return;
-        }
-        const account = accounts[index];
-        if (!account) return;
-        managedUserIndex = index;
-        document.getElementById('manageUserUsername').value = account.username;
-        document.getElementById('manageUserSubtitle').textContent = 'Change password or role for ' + account.username + '.';
-        document.getElementById('manageUserPassword').value = '';
-        document.getElementById('manageUserRole').value = account.role;
-        document.getElementById('manageUserOverlay').classList.add('show');
+    function openManageUser() {
+        showToast('User role management is not enabled in this browser-only version.');
     }
 
     function closeManageUser() {
         const overlay = document.getElementById('manageUserOverlay');
         if (overlay) overlay.classList.remove('show');
-        managedUserIndex = null;
     }
 
     function saveManagedUser() {
-        if (!activeAccount || activeAccount.role !== 'Administrator') {
-            showToast('Only the Administrator can manage users.');
-            return;
-        }
-        if (managedUserIndex === null || !accounts[managedUserIndex]) return;
-        const account = accounts[managedUserIndex];
-        const newPassword = document.getElementById('manageUserPassword').value.trim();
-        const newRole = document.getElementById('manageUserRole').value;
-
-        if (newPassword && newPassword.length < 6) {
-            showToast('Password must be at least 6 characters.');
-            return;
-        }
-
-        if (newPassword) account.password = newPassword;
-        account.role = newRole;
-        saveAccounts();
-        accounts = getAccounts();
-        renderUsers();
-        closeManageUser();
-        showToast('User changes saved successfully.');
+        showToast('Role changes must be performed through the secured administrator process.');
     }
+
+    // Restore a valid Supabase session after a page refresh or when opening Equip on another device.
+    async function restoreSupabaseSession() {
+        try {
+            const { data, error } = await supabaseClient.auth.getSession();
+            if (error) throw error;
+            if (data.session?.user) {
+                await loadSupabaseProfile(data.session.user);
+            }
+        } catch (error) {
+            console.error('Session restore error:', error);
+            activeAccount = null;
+            showToast(error.message || 'Could not restore your session. Please sign in again.');
+        }
+    }
+
+    restoreSupabaseSession();
 
     function escapeHtml(value) {
         return String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[char]));
