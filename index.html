@@ -219,16 +219,23 @@
         <p class="subtitle">School Equipment Borrowing and Inventory System</p>
         <form id="loginForm">
             <div class="form-group">
-                <label>Email</label>
-                <input id="loginUser" type="email" placeholder="Enter your email" autocomplete="username" required>
+                <label>Email / Username</label>
+                <input id="loginUser" type="text" placeholder="Enter your username" required>
             </div>
             <div class="form-group">
                 <label>Password</label>
-                <div style="position:relative"><input id="loginPass" type="password" placeholder="Enter your password" autocomplete="current-password" required style="padding-right:65px"><button type="button" onclick="toggleLoginPassword()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#2563eb;font-weight:700;cursor:pointer">Show</button></div>
+                <div style="position:relative"><input id="loginPass" type="password" placeholder="Enter your password" required style="padding-right:65px"><button type="button" onclick="toggleLoginPassword()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#2563eb;font-weight:700;cursor:pointer">Show</button></div>
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select id="loginRole">
+                    <option>Administrator</option>
+                    <option>Inventory / Maintenance Staff</option>
+                    <option>Faculty / Staff / Student</option>
+                </select>
             </div>
             <button class="primary-btn" type="submit">Sign In</button>
         </form>
-        <p class="register-link" onclick="openRegister()">Create Account</p>
     </div>
 </div>
 
@@ -250,7 +257,7 @@
         <div class="nav-title">Management</div>
         <button class="nav-item" data-section="maintenance"><span class="nav-icon">🔧</span><span>Damage & Maintenance</span></button>
         <button class="nav-item" data-section="reports"><span class="nav-icon">📄</span><span>Reports</span></button>
-        <button class="nav-item" data-section="notifications"><span class="nav-icon">🔔</span><span>Notifications</span></button>
+        <button class="nav-item" data-section="notifications"><span class="nav-icon">🔔</span><span>Notifications</span><span id="notificationCountBadge" class="badge overdue" style="display:none;margin-left:auto;padding:3px 7px">0</span></button>
         <button class="nav-item" data-section="users"><span class="nav-icon">👥</span><span>User Management</span></button>
         <button class="nav-item" data-section="settings"><span class="nav-icon">⚙</span><span>Settings</span></button>
 
@@ -325,7 +332,7 @@
                     <div class="toolbar">
                         <input id="searchEquipment" type="search" placeholder="Search asset, serial, equipment..." oninput="filterInventory()">
                         <select id="categoryFilter" onchange="filterInventory()">
-                            <option value="">All Categories</option><option>Computer</option><option>Projector</option><option>Camera</option><option>Laboratory</option><option>Sports</option>
+                            <option value="">All Categories</option><option>Computer Equipment</option><option>Audio-Visual Equipment</option><option>Electronic Equipment</option><option>Laboratory Equipment</option><option>Sports Equipment</option><option>Office Equipment</option><option>Networking Equipment</option><option>Photography Equipment</option><option>Electrical Equipment</option><option>Tools and Machinery</option><option>Others</option><option>Computer</option><option>Projector</option><option>Camera</option><option>Laboratory</option><option>Sports</option>
                         </select>
                         <select id="statusFilter" onchange="filterInventory()">
                             <option value="">All Status</option><option>Available</option><option>Borrowed</option><option>Maintenance</option><option>Archived</option>
@@ -348,9 +355,9 @@
                     <form id="equipmentForm">
                         <div class="form-grid">
                             <div class="form-group"><label>Equipment Name</label><input id="eqName" required placeholder="e.g. Projector 006"></div>
-                            <div class="form-group"><label>Asset Number</label><input id="eqAsset" required placeholder="e.g. EQ-006"></div>
+                            <div class="form-group"><label>Asset Number</label><input id="eqAsset" required placeholder="Automatically generated"></div>
                             <div class="form-group"><label>Serial Number</label><input id="eqSerial" required placeholder="Enter serial number"></div>
-                            <div class="form-group"><label>Category</label><select id="eqCategory" required><option>Computer</option><option>Projector</option><option>Camera</option><option>Laboratory</option><option>Sports</option></select></div>
+                            <div class="form-group"><label>Category</label><select id="eqCategory" required><option>Computer Equipment</option><option>Audio-Visual Equipment</option><option>Electronic Equipment</option><option>Laboratory Equipment</option><option>Sports Equipment</option><option>Office Equipment</option><option>Networking Equipment</option><option>Photography Equipment</option><option>Electrical Equipment</option><option>Tools and Machinery</option><option>Others</option></select></div>
                             <div class="form-group"><label>Location</label><input id="eqLocation" required placeholder="e.g. ICT Laboratory"></div>
                             <div class="form-group"><label>Condition</label><select id="eqCondition"><option>Good</option><option>Fair</option><option>Needs Repair</option></select></div>
                             <div class="form-group"><label>Status</label><select id="eqStatus"><option>Available</option><option>Borrowed</option><option>Maintenance</option></select></div>
@@ -404,11 +411,11 @@
 
             <!-- BORROWING -->
             <section class="section" id="borrowing">
-                <div class="card-header"><div><h2>Borrowing Requests</h2><p class="muted">Review, approve, or reject equipment requests.</p></div><button class="btn" onclick="showSection('borrowForm')">+ New Request</button></div>
+                <div class="card-header"><div><h2>Borrowing Requests <span id="borrowingRequestCount" class="badge" style="background:#e8eef5;color:#17324d;vertical-align:middle;margin-left:6px">0</span></h2><p class="muted">Review, approve, or reject equipment requests.</p></div><button class="btn" onclick="showSection('borrowForm')">+ New Request</button></div>
                 <div class="card">
                     <div class="table-wrap">
                     <table>
-                        <thead><tr><th>Request ID</th><th>Borrower</th><th>Equipment</th><th>Borrow Date</th><th>Return Date</th><th>Status</th><th id="requestActionHeader">Action</th></tr></thead>
+                        <thead><tr><th>Request ID</th><th>Borrower</th><th>Equipment</th><th>Borrow Date</th><th>Return Date</th><th>Time Borrowed</th><th>Status</th><th id="requestActionHeader">Action</th></tr></thead>
                         <tbody id="requestBody">
                             <tr><td>REQ-1001</td><td>Juan Dela Cruz</td><td>Projector 001</td><td>Oct 03</td><td>Oct 05</td><td><span class="badge pending">Pending</span></td><td><button class="btn green" onclick="approveRequest(this)">Approve</button> <button class="btn red" onclick="rejectRequest(this)">Reject</button></td></tr>
                             <tr><td>REQ-1002</td><td>Maria Santos</td><td>Digital Camera 002</td><td>Oct 03</td><td>Oct 04</td><td><span class="badge approved">Approved</span></td><td><button class="btn secondary">View</button></td></tr>
@@ -425,11 +432,11 @@
                     <div class="card-header"><div><h2>New Borrowing Request</h2><p class="muted">Submit a request for available equipment.</p></div></div>
                     <form id="borrowRequestForm">
                         <div class="form-grid">
-                            <div class="form-group"><label>Borrower Name</label><input required placeholder="Full name"></div>
+                            <div class="form-group"><label>Borrower Name</label><input id="borrowerNameInput" required placeholder="Full name"></div>
                             <div class="form-group"><label>Student / Employee ID</label><input required placeholder="ID number"></div>
                             <div class="form-group"><label>Equipment</label><select required><option>Projector 001</option><option>Basketball Set</option><option>Microscope 005</option></select></div>
                             <div class="form-group"><label>Purpose</label><input required placeholder="Class activity / event"></div>
-                            <div class="form-group"><label>Borrow Date</label><input type="date" required></div>
+                            <div class="form-group"><label>Borrow Date</label><input id="borrowDateInput" type="date" required></div>
                             <div class="form-group"><label>Expected Return Date</label><input type="date" required></div>
                             <div class="form-group full"><label>Remarks</label><textarea placeholder="Additional request details..."></textarea></div>
                             <div class="full"><button class="btn" type="submit">Submit Request</button> <button class="btn secondary" type="button" onclick="showSection('borrowing')">Cancel</button></div>
@@ -497,10 +504,10 @@
 
             <!-- USERS -->
             <section class="section" id="users">
-                <div class="card-header"><div><h2>User Management</h2><p class="muted">Account details for the currently signed-in user. Passwords are managed securely by Supabase and are never viewable here.</p></div></div>
+                <div class="card-header"><div><h2>User Management</h2><p class="muted">Manage system users, roles, and permissions.</p></div><button class="btn" onclick="openRegister()">+ Add User</button></div>
                 <div class="card">
                     <table>
-                        <thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Role</th><th>Status</th></tr></thead>
+                        <thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Role</th><th>Password</th><th>Status</th><th>Action</th></tr></thead>
                         <tbody id="usersTableBody"></tbody>
                     </table>
                 </div>
@@ -533,7 +540,9 @@
             <div class="form-group"><label>Username</label><input id="regUser" type="text" placeholder="Choose username" required></div>
             <div class="form-group"><label>Role</label>
                 <select id="regRole" required>
-                    <option value="Faculty / Staff / Student">Faculty / Staff / Student</option>
+                    <option>Administrator</option>
+                    <option>Inventory / Maintenance Staff</option>
+                    <option>Faculty / Staff / Student</option>
                 </select>
             </div>
             <div class="form-group"><label>Password</label><input id="regPass" type="password" minlength="6" placeholder="At least 6 characters" required></div>
@@ -546,17 +555,36 @@
     </div>
 </div>
 
+<!-- ADMIN MANAGE USER DIALOG -->
+<div class="register-overlay" id="manageUserOverlay" aria-hidden="true">
+    <div class="register-card">
+        <div class="register-head">
+            <div><h2>Manage User</h2><p class="muted" id="manageUserSubtitle">Update user password or role.</p></div>
+            <button class="close-register" type="button" onclick="closeManageUser()">×</button>
+        </div>
+        <div class="form-group"><label>Username</label><input id="manageUserUsername" type="text" readonly></div>
+        <div class="form-group"><label>New Password</label><input id="manageUserPassword" type="password" minlength="6" placeholder="Leave blank to keep current password"></div>
+        <div class="form-group"><label>Role</label>
+            <select id="manageUserRole">
+                <option>Administrator</option>
+                <option>Inventory / Maintenance Staff</option>
+                <option>Faculty / Staff / Student</option>
+            </select>
+        </div>
+        <div class="register-actions">
+            <button class="btn secondary" type="button" onclick="closeManageUser()">Cancel</button>
+            <button class="btn red" id="deleteManagedUserBtn" type="button" onclick="deleteManagedUser()">Delete User</button>
+            <button class="btn" type="button" onclick="saveManagedUser()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- HIDDEN HTML5 QR DECODER CONTAINER FOR FILE UPLOAD SCANNING -->
 <div id="hiddenQrContainer" style="display:none;"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    const SUPABASE_URL = 'https://ujkskvlwuqmmdgalzxkm.supabase.co';
-    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_fCuB5FYS_2w47LcgUzOOcg_upDV4lqD';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-
     const titles = {
         dashboard: "Dashboard",
         inventory: "Equipment Inventory",
@@ -582,6 +610,42 @@
 
     function hasAccess(id) {
         return !activeAccount || (ROLE_ACCESS[activeAccount.role] || []).includes(id);
+    }
+
+    function getLocalDateInputValue() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function syncBorrowerName() {
+        const borrowerInput = document.getElementById('borrowerNameInput');
+        if (!borrowerInput) return;
+        const isStudentAccount = activeAccount && activeAccount.role === 'Faculty / Staff / Student';
+        if (isStudentAccount) {
+            borrowerInput.value = String(activeAccount.name || '').trim();
+            borrowerInput.readOnly = true;
+            borrowerInput.style.backgroundColor = '#f3f6f9';
+            borrowerInput.title = 'Automatically filled from your account name';
+        } else {
+            borrowerInput.readOnly = false;
+            borrowerInput.style.backgroundColor = '';
+            borrowerInput.title = '';
+        }
+
+        const borrowDateInput = document.getElementById('borrowDateInput');
+        if (borrowDateInput && isStudentAccount) {
+            borrowDateInput.value = getLocalDateInputValue();
+            borrowDateInput.readOnly = true;
+            borrowDateInput.style.backgroundColor = '#f3f6f9';
+            borrowDateInput.title = 'Automatically set to today';
+        } else if (borrowDateInput) {
+            borrowDateInput.readOnly = false;
+            borrowDateInput.style.backgroundColor = '';
+            borrowDateInput.title = '';
+        }
     }
 
     function applyRoleAccess() {
@@ -614,6 +678,7 @@
 
         applyBorrowingView();
         renderStudentDashboard();
+        if (typeof renderNotifications === 'function') renderNotifications();
     }
 
     const BORROWING_REQUESTS_KEY = 'equipBorrowingRequests';
@@ -658,7 +723,8 @@
         );
 
         const pending = ownRequests.filter(r => r.status === 'Pending').length;
-        const borrowed = ownRequests.filter(r => r.status === 'Approved').length;
+        const actualBorrowedRequests = ownRequests.filter(r => ['Released', 'Overdue'].includes(r.status));
+        const borrowed = actualBorrowedRequests.length;
         const overdue = ownRequests.filter(r => r.status === 'Overdue').length;
 
         let available = 0;
@@ -686,14 +752,14 @@
         const recentBody = document.querySelector('#dashboard .grid-2 .card:first-child tbody');
         if (recentBody) {
             recentBody.innerHTML = '';
-            ownRequests.slice(-5).reverse().forEach(r => {
+            actualBorrowedRequests.slice(-5).reverse().forEach(r => {
                 const tr = document.createElement('tr');
                 const statusClass = r.status === 'Approved' ? 'approved' : (r.status === 'Overdue' ? 'overdue' : 'pending');
                 tr.innerHTML = `<td>${escapeHtml(r.borrower || currentUser)}</td><td>${escapeHtml(r.equipment || '')}</td><td>${escapeHtml(r.borrowDate || '')}</td><td><span class="badge ${statusClass}">${escapeHtml(r.status || 'Pending')}</span></td>`;
                 recentBody.appendChild(tr);
             });
-            if (!ownRequests.length) {
-                recentBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px" class="muted">You have no borrowing requests yet.</td></tr>';
+            if (!actualBorrowedRequests.length) {
+                recentBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px" class="muted">You have no currently borrowed equipment.</td></tr>';
             }
         }
     }
@@ -707,6 +773,7 @@
         if (request) {
             request.status = 'Approved';
             saveBorrowingRequests(requests);
+            addEquipNotification('Borrowing request approved', 'Your request for ' + request.equipment + ' has been approved.', {role:'Faculty / Staff / Student', name:request.ownerName || request.borrower});
             syncInventoryWithBorrowingRequests();
             renderInventory();
             renderBorrowingRequests();
@@ -744,43 +811,50 @@
         const savedRequests = getBorrowingRequests();
 
         const staticRows = [
-            ['REQ-1001','Juan Dela Cruz','Projector 001','Oct 03','Oct 05','Pending','pending'],
-            ['REQ-1002','Maria Santos','Digital Camera 002','Oct 03','Oct 04','Approved','approved'],
-            ['REQ-1003','Pedro Reyes','Laptop 003','Sep 30','Oct 01','Overdue','overdue']
+            {id:'REQ-1001',borrower:'Juan Dela Cruz',equipment:'Projector 001',borrowDate:'Oct 03',returnDate:'Oct 05',status:'Pending'},
+            {id:'REQ-1002',borrower:'Maria Santos',equipment:'Digital Camera 002',borrowDate:'Oct 03',returnDate:'Oct 04',status:'Approved'},
+            {id:'REQ-1003',borrower:'Pedro Reyes',equipment:'Laptop 003',borrowDate:'Sep 30',returnDate:'Oct 01',status:'Overdue'}
         ];
 
-        const allRows = savedRequests.map(r => ({
-            id:r.id, borrower:r.borrower, ownerName:r.ownerName, equipment:r.equipment, borrowDate:r.borrowDate, returnDate:r.returnDate, status:r.status, saved:true
+        const allRows = savedRequests.map((r, index) => ({
+            id:r.id, borrower:r.borrower, ownerName:r.ownerName, equipment:r.equipment,
+            borrowDate:r.borrowDate, returnDate:r.returnDate, releasedAt:r.releasedAt,
+            requestedAt:r.requestedAt, status:r.status, saved:true,
+            sortTime: r.requestedAt ? (Date.parse(r.requestedAt) || 0) : index + 1
         }));
 
         if (!isRegularUser) {
-            staticRows.forEach(r => allRows.push({id:r[0],borrower:r[1],equipment:r[2],borrowDate:r[3],returnDate:r[4],status:r[5],badge:r[6]}));
+            staticRows.forEach(r => allRows.push({...r, badge:r.status.toLowerCase(), sortTime:0}));
         }
 
-        const visibleRows = isRegularUser
+        const visibleRows = (isRegularUser
             ? allRows.filter(r => String(r.ownerName || r.borrower || '').trim().toLowerCase() === currentUser)
-            : allRows;
+            : allRows).sort((a, b) => b.sortTime - a.sortTime);
+
+        const countBadge = document.getElementById('borrowingRequestCount');
+        if (countBadge) countBadge.textContent = visibleRows.length;
 
         const header = document.getElementById('requestActionHeader');
         if (header) header.style.display = isRegularUser ? 'none' : '';
 
         tbody.innerHTML = '';
-
         visibleRows.forEach(r => {
             const tr = document.createElement('tr');
-            const statusClass = r.status === 'Approved' ? 'approved' : (r.status === 'Overdue' ? 'overdue' : 'pending');
+            const statusClass = r.status === 'Approved' || r.status === 'Released' || r.status === 'Returned'
+                ? 'approved' : (r.status === 'Overdue' ? 'overdue' : (r.status === 'Rejected' ? 'overdue' : 'pending'));
             let action = '';
             if (!isRegularUser) {
                 action = `<button class="btn secondary" onclick="viewBorrowRequest('${escapeHtml(String(r.id))}')">View</button>`;
             }
-            tr.innerHTML = `<td>${r.id}</td><td>${r.borrower}</td><td>${r.equipment}</td><td>${r.borrowDate}</td><td>${r.returnDate}</td><td><span class="badge ${statusClass}">${r.status}</span></td><td class="request-action-cell" style="${isRegularUser ? 'display:none' : ''}">${action}</td>`;
+            const borrowedTime = r.releasedAt ? new Date(r.releasedAt).toLocaleString() : '—';
+            tr.innerHTML = `<td>${escapeHtml(String(r.id || ''))}</td><td>${escapeHtml(String(r.borrower || ''))}</td><td>${escapeHtml(String(r.equipment || ''))}</td><td>${escapeHtml(String(r.borrowDate || ''))}</td><td>${escapeHtml(String(r.returnDate || '—'))}</td><td>${escapeHtml(borrowedTime)}</td><td><span class="badge ${statusClass}">${escapeHtml(String(r.status || 'Pending'))}</span></td><td class="request-action-cell" style="${isRegularUser ? 'display:none' : ''}">${action}</td>`;
             tbody.appendChild(tr);
         });
 
         if (isRegularUser && visibleRows.length === 0) {
             const row = document.createElement('tr');
             row.id = 'noOwnRequestsRow';
-            row.innerHTML = '<td colspan="7" style="text-align:center;padding:24px" class="muted">You have no borrowing requests yet.</td>';
+            row.innerHTML = '<td colspan="8" style="text-align:center;padding:24px" class="muted">You have no borrowing requests yet.</td>';
             tbody.appendChild(row);
         }
     }
@@ -815,6 +889,7 @@
             <div class="record-field"><label>Equipment</label><span>${escapeHtml(data.equipment || '—')}</span></div>
             <div class="record-field"><label>Status</label><span class="badge ${statusClass(status)}">${escapeHtml(status)}</span></div>
             <div class="record-field"><label>Borrow Date</label><span>${escapeHtml(data.borrowDate || '—')}</span></div>
+            <div class="record-field"><label>Time Borrowed</label><span>${escapeHtml(data.releasedAt ? new Date(data.releasedAt).toLocaleString() : 'Not yet released')}</span></div>
             <div class="record-field"><label>Return Date</label><span>${escapeHtml(data.returnDate || '—')}</span></div>
             <div class="record-field full"><label>Purpose</label><span>${escapeHtml(purpose)}</span></div>
             <div class="record-field full"><label>Remarks</label><span>${escapeHtml(remarks)}</span></div>
@@ -832,6 +907,7 @@
         if (!request) { showToast('Borrowing request approved.'); closeEquipmentRecord(); return; }
         request.status = 'Approved';
         saveBorrowingRequests(requests);
+        addEquipNotification('Borrowing request approved', 'Your request for ' + request.equipment + ' has been approved.', {role:'Faculty / Staff / Student', name:request.ownerName || request.borrower});
         syncInventoryWithBorrowingRequests();
         renderInventory();
         closeEquipmentRecord();
@@ -871,6 +947,8 @@
 
         document.getElementById('pageTitle').textContent = titles[id] || "E-QUIP";
         if (id === 'borrowing') applyBorrowingView();
+        if (id === 'borrowForm') syncBorrowerName();
+        if (id === 'addEquipment') refreshNextAssetNumber();
         window.scrollTo({top:0, behavior:'smooth'});
     }
 
@@ -878,66 +956,47 @@
         btn.addEventListener('click', () => showSection(btn.dataset.section));
     });
 
-    // Supabase authentication replaces the old localStorage account/password system.
-    const SUPABASE_ROLE_LABELS = {
-        admin: 'Administrator',
-        inventory_maintenance: 'Inventory / Maintenance Staff',
-        faculty_staff_student: 'Faculty / Staff / Student'
+    const DEFAULT_ACCOUNT = {
+        name: 'System Administrator',
+        email: 'admin@equip.edu',
+        username: 'admin',
+        role: 'Administrator',
+        password: 'admin123'
     };
+    const ACCOUNTS_KEY = 'equipAccounts';
 
-    function toEquipAccount(user, profile) {
-        const roleLabel = SUPABASE_ROLE_LABELS[profile.role];
-        if (!roleLabel) throw new Error('This account has an unrecognized role.');
-        return {
-            id: user.id,
-            name: profile.full_name || user.email || 'E-QUIP User',
-            email: user.email || '',
-            username: profile.username || '',
-            role: roleLabel
-        };
+    function getAccounts() {
+        try {
+            const raw = localStorage.getItem(ACCOUNTS_KEY);
+            if (!raw) {
+                const initial = [DEFAULT_ACCOUNT];
+                localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(initial));
+                return initial;
+            }
+            const saved = JSON.parse(raw);
+            if (!Array.isArray(saved)) throw new Error('Invalid accounts data');
+
+            if (!saved.some(a => String(a.username).toLowerCase() === 'admin')) {
+                saved.unshift(DEFAULT_ACCOUNT);
+                localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(saved));
+            }
+            return saved;
+        } catch (error) {
+            const initial = [DEFAULT_ACCOUNT];
+            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(initial));
+            return initial;
+        }
     }
 
-    async function loadSupabaseProfile(user) {
-        const { data: profile, error } = await supabaseClient
-            .from('profiles')
-            .select('full_name, username, role')
-            .eq('id', user.id)
-            .single();
+    let accounts = getAccounts();
 
-        if (error || !profile) {
-            throw new Error('Your account profile could not be loaded. Please contact the system administrator.');
-        }
-
-        activeAccount = toEquipAccount(user, profile);
-        updateSignedInUI();
-        return activeAccount;
-    }
-
-    function updateSignedInUI() {
-        if (!activeAccount) return;
-
-        document.getElementById('userDisplay').textContent = activeAccount.name;
-        const profileRole = document.querySelector('.profile small');
-        if (profileRole) profileRole.textContent = activeAccount.role;
-
-        const avatar = document.querySelector('.profile .avatar');
-        if (avatar) {
-            avatar.textContent = String(activeAccount.name || 'EQ')
-                .split(/\s+/).filter(Boolean).slice(0, 2)
-                .map(part => part.charAt(0).toUpperCase()).join('');
-        }
-
-        applyRoleAccess();
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        renderUsers();
+    function saveAccounts() {
+        localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
     }
 
     function openRegister() {
         document.getElementById('registerOverlay').style.display = 'flex';
         document.getElementById('registerForm').reset();
-        const roleSelect = document.getElementById('regRole');
-        if (roleSelect) roleSelect.value = 'Faculty / Staff / Student';
     }
 
     function closeRegister() {
@@ -945,22 +1004,18 @@
         document.getElementById('registerForm').reset();
     }
 
-    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const submitButton = this.querySelector('button[type="submit"]');
         const name = document.getElementById('regName').value.trim();
-        const email = document.getElementById('regEmail').value.trim().toLowerCase();
+        const email = document.getElementById('regEmail').value.trim();
         const username = document.getElementById('regUser').value.trim();
+        const role = document.getElementById('regRole').value;
         const password = document.getElementById('regPass').value;
         const confirm = document.getElementById('regConfirm').value;
 
-        if (!name || !email || !username || !password) {
+        if (!name || !email || !username || !role || !password) {
             showToast('Please complete all fields.');
-            return;
-        }
-        if (!/^[a-zA-Z0-9_.-]{3,30}$/.test(username)) {
-            showToast('Username must be 3–30 characters and use only letters, numbers, dot, underscore, or hyphen.');
             return;
         }
         if (password !== confirm) {
@@ -971,88 +1026,57 @@
             showToast('Password must be at least 6 characters.');
             return;
         }
-
-        if (submitButton) {
-            submitButton.disabled = true;
-            submitButton.textContent = 'Creating account...';
+        if (accounts.some(a => a.username.toLowerCase() === username.toLowerCase())) {
+            showToast('Username already exists.');
+            return;
+        }
+        if (accounts.some(a => a.email.toLowerCase() === email.toLowerCase())) {
+            showToast('Email is already registered.');
+            return;
         }
 
-        try {
-            // Never send a role from the browser. The database trigger assigns the default role.
-            const { data, error } = await supabaseClient.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        full_name: name,
-                        username: username
-                    }
-                }
-            });
+        const newAccount = { name, email, username, role, password };
+        accounts.push(newAccount);
+        saveAccounts();
 
-            if (error) {
-                const message = /duplicate key|unique constraint/i.test(error.message)
-                    ? 'That username is already in use. Please choose another.'
-                    : error.message;
-                throw new Error(message);
-            }
-
-            closeRegister();
-
-            if (data.session && data.user) {
-                await loadSupabaseProfile(data.user);
-                showToast('Account created successfully. Welcome, ' + (activeAccount?.name || name) + '!');
-            } else {
-                showToast('Registration received. Check your email to confirm your account, then sign in.');
-                document.getElementById('loginUser').value = email;
-                document.getElementById('loginPass').value = '';
-            }
-        } catch (error) {
-            console.error('Supabase registration error:', error);
-            showToast(error.message || 'Could not create the account. Please try again.');
-        } finally {
-            if (submitButton) {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Create Account';
-            }
-        }
+        closeRegister();
+        document.getElementById('loginUser').value = username;
+        document.getElementById('loginPass').value = password;
+        document.getElementById('loginRole').value = role;
+        renderUsers();
+        showToast('Account created and saved successfully.');
     });
 
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const submitButton = this.querySelector('button[type="submit"]');
-        const email = document.getElementById('loginUser').value.trim().toLowerCase();
+        accounts = getAccounts();
+
+        const username = document.getElementById('loginUser').value.trim();
         const password = document.getElementById('loginPass').value;
+        const role = document.getElementById('loginRole').value;
+        const account = accounts.find(a =>
+            a.username.toLowerCase() === username.toLowerCase() &&
+            a.password === password &&
+            a.role === role
+        );
 
-        if (submitButton) {
-            submitButton.disabled = true;
-            submitButton.textContent = 'Signing in...';
+        if (!account) {
+            showToast('Invalid username, password, or role.');
+            return;
         }
 
-        try {
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-                email,
-                password
-            });
+        activeAccount = account;
+        syncBorrowerName();
+        document.getElementById('userDisplay').textContent = account.name;
+        document.querySelector('.profile small').textContent = account.role;
+        applyRoleAccess();
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        showToast('Welcome, ' + account.name + '!');
 
-            if (error) throw error;
-            if (!data.user) throw new Error('Supabase did not return a signed-in user.');
-
-            await loadSupabaseProfile(data.user);
-            showToast('Welcome, ' + activeAccount.name + '!');
-        } catch (error) {
-            console.error('Supabase login error:', error);
-            const message = /email not confirmed/i.test(error.message)
-                ? 'Please confirm your email before signing in.'
-                : (error.message || 'Unable to sign in. Check your email and password.');
-            showToast(message);
-        } finally {
-            if (submitButton) {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Sign In';
-            }
-        }
+        if (document.getElementById('users')) renderUsers();
+        renderNotifications();
     });
 
     function toggleLoginPassword() {
@@ -1067,77 +1091,135 @@
             toggleButton.setAttribute('aria-pressed', shouldShow ? 'true' : 'false');
         }
     }
+    // Explicitly expose the handler for the existing inline button action.
     window.toggleLoginPassword = toggleLoginPassword;
 
-    document.getElementById('logoutBtn').addEventListener('click', async function() {
-        const { error } = await supabaseClient.auth.signOut();
-        if (error) {
-            showToast('Could not sign out. Please try again.');
-            return;
-        }
-
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        accounts = getAccounts();
         activeAccount = null;
         document.getElementById('app').style.display = 'none';
         document.getElementById('loginPage').style.display = 'flex';
         document.querySelector('.register-link').style.display = '';
         document.getElementById('loginForm').reset();
-        showToast('You have been signed out.');
+        showToast('Logged out. Your account is still saved.');
     });
 
     function renderUsers() {
         const tbody = document.getElementById('usersTableBody');
         if (!tbody) return;
+        const isAdmin = activeAccount && activeAccount.role === 'Administrator';
+        tbody.innerHTML = accounts.map((account, index) => {
+            const passwordCell = isAdmin
+                ? `<div style="display:flex;gap:6px;align-items:center;min-width:150px">
+                     <input id="userPass_${index}" type="password" value="${escapeHtml(account.password)}" readonly style="max-width:120px;padding:7px">
+                     <button class="btn secondary" type="button" onclick="toggleUserPassword(${index})" title="Show/Hide password">👁️</button>
+                   </div>`
+                : '<span class="muted">Hidden</span>';
+            const actionCell = isAdmin
+                ? `<button class="btn secondary" type="button" onclick="openManageUser(${index})">Manage</button>`
+                : '<span class="muted">—</span>';
+            return `
+                <tr>
+                    <td>${escapeHtml(account.name)}</td>
+                    <td>${escapeHtml(account.email)}</td>
+                    <td>${escapeHtml(account.username)}</td>
+                    <td>${escapeHtml(account.role)}</td>
+                    <td>${passwordCell}</td>
+                    <td><span class="badge available">Active</span></td>
+                    <td>${actionCell}</td>
+                </tr>`;
+        }).join('');
+    }
 
-        if (!activeAccount) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center" class="muted">Sign in to view your account details.</td></tr>';
+    function toggleUserPassword(index) {
+        if (!activeAccount || activeAccount.role !== 'Administrator') {
+            showToast('Only the Administrator can view passwords.');
             return;
         }
-
-        tbody.innerHTML = `
-            <tr>
-                <td>${escapeHtml(activeAccount.name)}</td>
-                <td>${escapeHtml(activeAccount.email)}</td>
-                <td>${escapeHtml(activeAccount.username || '—')}</td>
-                <td>${escapeHtml(activeAccount.role)}</td>
-                <td><span class="badge available">Active</span></td>
-            </tr>`;
+        const input = document.getElementById('userPass_' + index);
+        if (!input) return;
+        input.type = input.type === 'password' ? 'text' : 'password';
     }
 
-    // Passwords and role changes are intentionally not editable in browser-side JavaScript.
-    // User listing and administrator-only role assignment need a separate secured backend RPC.
-    function toggleUserPassword() {
-        showToast('Passwords are securely managed by Supabase and cannot be viewed.');
-    }
+    let managedUserIndex = null;
 
-    function openManageUser() {
-        showToast('User role management is not enabled in this browser-only version.');
+    function openManageUser(index) {
+        if (!activeAccount || activeAccount.role !== 'Administrator') {
+            showToast('Only the Administrator can manage users.');
+            return;
+        }
+        const account = accounts[index];
+        if (!account) return;
+        managedUserIndex = index;
+        document.getElementById('manageUserUsername').value = account.username;
+        document.getElementById('manageUserSubtitle').textContent = 'Change password or role for ' + account.username + '.';
+        document.getElementById('manageUserPassword').value = '';
+        document.getElementById('manageUserRole').value = account.role;
+        const deleteButton = document.getElementById('deleteManagedUserBtn');
+        if (deleteButton) {
+            const isMainAdmin = String(account.username || '').toLowerCase() === 'admin';
+            deleteButton.disabled = isMainAdmin;
+            deleteButton.title = isMainAdmin ? 'The main Administrator account cannot be deleted.' : '';
+            deleteButton.style.opacity = isMainAdmin ? '.5' : '';
+            deleteButton.style.cursor = isMainAdmin ? 'not-allowed' : '';
+        }
+        const overlay = document.getElementById('manageUserOverlay');
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
     }
 
     function closeManageUser() {
         const overlay = document.getElementById('manageUserOverlay');
-        if (overlay) overlay.classList.remove('show');
+        if (overlay) { overlay.classList.remove('show'); overlay.setAttribute('aria-hidden', 'true'); }
+        managedUserIndex = null;
+    }
+
+    function deleteManagedUser() {
+        if (!activeAccount || activeAccount.role !== 'Administrator') {
+            showToast('Only the Administrator can delete users.');
+            return;
+        }
+        if (managedUserIndex === null || !accounts[managedUserIndex]) return;
+
+        const account = accounts[managedUserIndex];
+        if (String(account.username || '').toLowerCase() === 'admin') {
+            showToast('The main Administrator account cannot be deleted.');
+            return;
+        }
+
+        const username = account.username;
+        if (!confirm('Are you sure you want to permanently delete the account for "' + username + '"? This action cannot be undone.')) return;
+
+        accounts.splice(managedUserIndex, 1);
+        saveAccounts();
+        renderUsers();
+        closeManageUser();
+        showToast('User account deleted successfully.');
     }
 
     function saveManagedUser() {
-        showToast('Role changes must be performed through the secured administrator process.');
-    }
-
-    // Restore a valid Supabase session after a page refresh or when opening Equip on another device.
-    async function restoreSupabaseSession() {
-        try {
-            const { data, error } = await supabaseClient.auth.getSession();
-            if (error) throw error;
-            if (data.session?.user) {
-                await loadSupabaseProfile(data.session.user);
-            }
-        } catch (error) {
-            console.error('Session restore error:', error);
-            activeAccount = null;
-            showToast(error.message || 'Could not restore your session. Please sign in again.');
+        if (!activeAccount || activeAccount.role !== 'Administrator') {
+            showToast('Only the Administrator can manage users.');
+            return;
         }
-    }
+        if (managedUserIndex === null || !accounts[managedUserIndex]) return;
+        const account = accounts[managedUserIndex];
+        const newPassword = document.getElementById('manageUserPassword').value.trim();
+        const newRole = document.getElementById('manageUserRole').value;
 
-    restoreSupabaseSession();
+        if (newPassword && newPassword.length < 6) {
+            showToast('Password must be at least 6 characters.');
+            return;
+        }
+
+        if (newPassword) account.password = newPassword;
+        account.role = newRole;
+        saveAccounts();
+        accounts = getAccounts();
+        renderUsers();
+        closeManageUser();
+        showToast('User changes saved successfully.');
+    }
 
     function escapeHtml(value) {
         return String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[char]));
@@ -1184,6 +1266,23 @@
         localStorage.setItem(INVENTORY_KEY, JSON.stringify(records));
     }
 
+    // Generate sequential Asset Numbers without reusing numbers from deleted records.
+    const ASSET_SEQUENCE_KEY = 'equipAssetNumberSequence';
+    function getNextAssetNumber(records = getInventoryRecords()) {
+        let highest = 0;
+        records.forEach(item => {
+            const match = String(item.asset || '').trim().match(/^eq-(\d+)$/i);
+            if (match) highest = Math.max(highest, Number(match[1]));
+        });
+        const savedSequence = Number(localStorage.getItem(ASSET_SEQUENCE_KEY) || 0);
+        const next = Math.max(highest, Number.isFinite(savedSequence) ? savedSequence : 0) + 1;
+        return 'EQ-' + String(next).padStart(3, '0');
+    }
+    function refreshNextAssetNumber() {
+        const field = document.getElementById('eqAsset');
+        if (field) field.value = getNextAssetNumber();
+    }
+
     function syncInventoryWithBorrowingRequests() {
         const records = getInventoryRecords();
         const requests = getBorrowingRequests();
@@ -1194,8 +1293,15 @@
             if (!itemRequests.length) return;
             const latest = itemRequests.slice().reverse().find(r => ['Approved','Released','Overdue','Returned'].includes(r.status));
             if (!latest) return;
-            const nextStatus = latest.status === 'Returned' ? 'Available' : 'Borrowed';
-            if (item.status !== nextStatus) { item.status = nextStatus; changed = true; }
+            // Only active borrowing requests should force the inventory status to Borrowed.
+            // A returned request must not overwrite a status manually set to Maintenance.
+            if (['Approved','Released','Overdue'].includes(latest.status) && item.status !== 'Borrowed') {
+                item.status = 'Borrowed';
+                changed = true;
+            } else if (latest.status === 'Returned' && item.status === 'Borrowed') {
+                item.status = 'Available';
+                changed = true;
+            }
         });
         if (changed) saveInventoryRecords(records);
         return records;
@@ -1328,7 +1434,14 @@
     document.getElementById('equipmentForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const name = document.getElementById('eqName').value.trim();
-        const asset = document.getElementById('eqAsset').value.trim().toUpperCase();
+        const records = getInventoryRecords();
+        const assetField = document.getElementById('eqAsset');
+        const asset = assetField.value.trim().toUpperCase();
+        assetField.value = asset;
+        if (!asset) {
+            showToast('Please enter an Asset Number.');
+            return;
+        }
         const serial = document.getElementById('eqSerial').value.trim();
         const category = document.getElementById('eqCategory').value;
         const location = document.getElementById('eqLocation').value.trim();
@@ -1336,9 +1449,11 @@
         const status = document.getElementById('eqStatus').value;
         const remarks = document.getElementById('eqRemarks').value.trim();
         const photoFile = document.getElementById('eqPhoto').files[0];
-        const records = getInventoryRecords();
 
-        if (records.some(item => item.asset.toLowerCase() === asset.toLowerCase())) {
+        const existingActive = records.find(item =>
+            !item.archived && String(item.asset || '').trim().toLowerCase() === asset.toLowerCase()
+        );
+        if (existingActive) {
             showToast('Asset number already exists.');
             return;
         }
@@ -1347,11 +1462,25 @@
         try { photo = await readEquipmentPhoto(photoFile); }
         catch (error) { showToast(error.message); return; }
 
-        records.push({ asset, name, serial, category, location, condition, status, photo, remarks, registeredAt: new Date().toISOString().slice(0,10), archived:false });
+        const archivedRecord = records.find(item =>
+            item.archived && String(item.asset || '').trim().toLowerCase() === asset.toLowerCase()
+        );
+        if (archivedRecord) {
+            Object.assign(archivedRecord, {
+                asset, name, serial, category, location, condition, status, photo, remarks,
+                registeredAt: new Date().toISOString().slice(0,10), archived: false
+            });
+            delete archivedRecord.archivedAt;
+        } else {
+            records.push({ asset, name, serial, category, location, condition, status, photo, remarks, registeredAt: new Date().toISOString().slice(0,10), archived:false });
+        }
         saveInventoryRecords(records);
+        const sequenceMatch = asset.match(/^eq-(\d+)$/i);
+        if (sequenceMatch) localStorage.setItem(ASSET_SEQUENCE_KEY, String(Number(sequenceMatch[1])));
         this.reset();
+        refreshNextAssetNumber();
         renderInventory();
-        showToast(name + ' added to the equipment registry.');
+        showToast(archivedRecord ? name + ' restored to the equipment registry.' : name + ' added to the equipment registry.');
         showSection('inventory');
     });
 
@@ -1361,11 +1490,14 @@
         e.preventDefault();
 
         const fields = this.querySelectorAll('input, select, textarea');
-        const borrower = fields[0].value.trim();
+        const isStudentAccount = activeAccount && activeAccount.role === 'Faculty / Staff / Student';
+        const borrower = isStudentAccount
+            ? String(activeAccount.name || '').trim()
+            : fields[0].value.trim();
         const studentId = fields[1].value.trim();
         const equipment = fields[2].value;
         const purpose = fields[3].value.trim();
-        const borrowDate = fields[4].value;
+        const borrowDate = isStudentAccount ? getLocalDateInputValue() : fields[4].value;
         const returnDate = fields[5].value;
         const remarks = fields[6].value.trim();
 
@@ -1385,9 +1517,11 @@
             borrowDate: borrowDate,
             returnDate: returnDate,
             remarks: remarks,
-            status: 'Pending'
+            status: 'Pending',
+            requestedAt: new Date().toISOString()
         });
         saveBorrowingRequests(requests);
+        addEquipNotification('New borrowing request', borrower + ' requested to borrow ' + equipment + '.', {role:'Administrator'});
         renderStudentDashboard();
 
         showToast('Borrowing request submitted successfully.');
@@ -1406,8 +1540,20 @@
             headers = ['Asset No.','Equipment','Serial No.','Category','Location','Condition','Status','Archived','Registered Date','Remarks'];
             rows = getInventoryRecords().map(x => [x.asset,x.name,x.serial,x.category,x.location,x.condition,x.status,x.archived ? 'Yes':'No',x.registeredAt,x.remarks]);
         } else if (type === 'borrowing') {
-            headers = ['Request ID','Borrower','Student/Employee ID','Equipment','Purpose','Borrow Date','Return Date','Status','Remarks'];
-            rows = getBorrowingRequests().map(x => [x.id,x.borrower,x.studentId,x.equipment,x.purpose,x.borrowDate,x.returnDate,x.status,x.remarks]);
+            headers = ['Request ID','Borrower','Student/Employee ID','Equipment','Purpose','Borrow Date and Time','Scheduled Return Date','Actual Return Date and Time','Status','Remarks','Request Submitted'];
+            rows = getBorrowingRequests().map(x => {
+                const borrowedTime = x.releasedAt ? new Date(x.releasedAt).toLocaleTimeString() : '';
+                const returnedTime = x.returnedAt ? new Date(x.returnedAt).toLocaleTimeString() : '';
+                const borrowDateFormatted = x.borrowDate ? new Date(x.borrowDate + 'T00:00:00').toLocaleDateString() : '';
+                const actualReturnFormatted = x.actualReturn ? new Date(x.actualReturn + 'T00:00:00').toLocaleDateString() : '';
+                const borrowingDateTime = borrowDateFormatted ? (borrowedTime ? borrowDateFormatted + ' ' + borrowedTime : borrowDateFormatted) : (x.releasedAt ? new Date(x.releasedAt).toLocaleString() : '');
+                const returnedDateTime = actualReturnFormatted ? (returnedTime ? actualReturnFormatted + ' ' + returnedTime : actualReturnFormatted) : (x.returnedAt ? new Date(x.returnedAt).toLocaleString() : '');
+                return [
+                    x.id, x.borrower, x.studentId, x.equipment, x.purpose, borrowingDateTime,
+                    x.returnDate, returnedDateTime, x.status, x.remarks,
+                    x.requestedAt ? new Date(x.requestedAt).toLocaleString() : ''
+                ];
+            });
         } else {
             headers = ['Asset','Incident','Date','Cost','Status','Resolution','Reported By'];
             rows = getMaintenanceRecords().map(x => [x.asset,x.incident,x.date,x.cost,x.status,x.resolution,x.reportedBy]);
@@ -1701,24 +1847,51 @@
     function getTransactions() { return readArray(EQUIP_TX_KEY); }
     function saveTransactions(v) { writeArray(EQUIP_TX_KEY, v); }
     function getNotifications() { return readArray(EQUIP_NOTIF_KEY); }
-    function addEquipNotification(title, message) {
+    function addEquipNotification(title, message, audience = {}) {
         const list = getNotifications();
-        list.unshift({id:'NTF-' + Date.now(), title, message, date:new Date().toLocaleString(), read:false});
+        list.unshift({id:'NTF-' + Date.now() + '-' + Math.random().toString(36).slice(2,7), title, message, date:new Date().toLocaleString(), createdAt:new Date().toISOString(), read:false, recipientRole:audience.role || '', recipientName:audience.name || ''});
         writeArray(EQUIP_NOTIF_KEY, list.slice(0,250));
         renderNotifications();
     }
+    function getVisibleNotifications() {
+        const role = activeAccount?.role || 'Administrator';
+        const name = String(activeAccount?.name || '').trim().toLowerCase();
+        return getNotifications().filter(n => {
+            if (n.recipientRole && n.recipientRole !== role) return false;
+            if (n.recipientName && String(n.recipientName).trim().toLowerCase() !== name) return false;
+            return true;
+        });
+    }
     function markAllNotificationsRead() {
-        const list = getNotifications().map(n => ({...n, read:true}));
+        const visibleIds = new Set(getVisibleNotifications().map(n => n.id));
+        const list = getNotifications().map(n => visibleIds.has(n.id) ? ({...n, read:true}) : n);
         writeArray(EQUIP_NOTIF_KEY, list); renderNotifications(); showToast('All notifications marked as read.');
+    }
+    function markNotificationRead(notificationId) {
+        const list = getNotifications();
+        const item = list.find(n => n.id === notificationId);
+        if (!item || item.read) return;
+        item.read = true;
+        item.readAt = new Date().toISOString();
+        writeArray(EQUIP_NOTIF_KEY, list);
+        renderNotifications();
     }
     function renderNotifications() {
         const body = document.getElementById('notificationsBody'); if (!body) return;
-        const list = getNotifications(); body.innerHTML = '';
+        const list = getVisibleNotifications(); body.innerHTML = '';
+        const unreadCount = list.filter(n => !n.read).length;
+        const countBadge = document.getElementById('notificationCountBadge');
+        if (countBadge) { countBadge.textContent = unreadCount > 99 ? '99+' : String(unreadCount); countBadge.style.display = unreadCount ? 'inline-block' : 'none'; }
         if (!list.length) { body.innerHTML = '<tr><td colspan="3" class="muted" style="text-align:center;padding:20px">No notifications yet.</td></tr>'; return; }
-        list.forEach(n => { const tr=document.createElement('tr'); if (!n.read) tr.style.fontWeight='700';
+        list.forEach(n => { const tr=document.createElement('tr');
+            tr.style.fontWeight = n.read ? '400' : '700';
+            tr.style.cursor = n.read ? 'default' : 'pointer';
+            tr.title = n.read ? 'Already read' : 'Click to mark as read';
             const icon=document.createElement('td'); icon.textContent=n.read?'✓':'🔔';
             const content=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=n.title||'Notification'; const small=document.createElement('div'); small.className='muted'; small.textContent=n.message||''; content.append(strong,small);
-            const date=document.createElement('td'); date.textContent=n.date||''; tr.append(icon,content,date); body.appendChild(tr);
+            const date=document.createElement('td'); date.textContent=n.date||''; tr.append(icon,content,date);
+            if (!n.read) tr.addEventListener('click', () => markNotificationRead(n.id));
+            body.appendChild(tr);
         });
     }
     function modifyEquipment(asset) {
@@ -1735,7 +1908,7 @@
         return;
     }
 
-    const categoryOptions = ['Computer', 'Projector', 'Camera', 'Laboratory', 'Sports'];
+    const categoryOptions = ['Computer Equipment', 'Audio-Visual Equipment', 'Electronic Equipment', 'Laboratory Equipment', 'Sports Equipment', 'Office Equipment', 'Networking Equipment', 'Photography Equipment', 'Electrical Equipment', 'Tools and Machinery', 'Others'];
     const conditionOptions = ['Good', 'Fair', 'Needs Repair'];
     const statusOptions = ['Available', 'Borrowed', 'Maintenance'];
 
@@ -1847,8 +2020,8 @@
         }
 
         if (records.some(x =>
-            x !== item &&
-            (x.serial || '').toLowerCase() === serial.toLowerCase()
+            x !== item && !x.archived &&
+            (x.serial || '').trim().toLowerCase() === serial.toLowerCase()
         )) {
             showToast('Serial number already exists.');
             return;
@@ -1885,12 +2058,16 @@
     });
 }
     function deleteEquipment(asset) {
-        if (!activeAccount || activeAccount.role !== 'Administrator') return showToast('Only the Administrator can archive equipment.');
-        const records=getInventoryRecords(), item=records.find(x=>x.asset===asset); if(!item) return showToast('Equipment not found.');
-        if(item.status==='Borrowed') return showToast('Cannot archive equipment while it is borrowed.');
-        if(!confirm('Archive '+item.name+'? The record will be retained and can be viewed under Show Archived.')) return;
-        item.archived=true; item.archivedAt=new Date().toISOString(); saveInventoryRecords(records);
-        closeEquipmentRecord(); renderInventory(); showToast('Equipment archived. The record was not permanently deleted.');
+        if (!activeAccount || activeAccount.role !== 'Administrator') return showToast('Only the Administrator can delete equipment.');
+        const records = getInventoryRecords();
+        const item = records.find(x => x.asset === asset);
+        if (!item) return showToast('Equipment not found.');
+        if (item.status === 'Borrowed') return showToast('Cannot delete equipment while it is borrowed.');
+        if (!confirm('Permanently delete ' + item.name + '? This record will be removed from the inventory and cannot be restored.')) return;
+        saveInventoryRecords(records.filter(x => x !== item));
+        closeEquipmentRecord();
+        renderInventory();
+        showToast('Equipment permanently deleted.');
     }
     function nextId(prefix, list, field) { const nums=list.map(x=>parseInt(String(x[field]||'').replace(prefix,''),10)).filter(Number.isFinite); return prefix+(Math.max(0,...nums)+1); }
     function renderTransactions() {
@@ -1928,7 +2105,7 @@
         const inv=getInventoryRecords(), item=inv.find(x=>x.name.toLowerCase()===String(r.equipment).toLowerCase()&&!x.archived);
         if(item){item.status=condition==='Needs Repair'?'Maintenance':'Available';item.condition=condition;saveInventoryRecords(inv);}
         renderInventory();renderBorrowingRequests();renderTransactions();renderStudentDashboard();
-        addEquipNotification('Equipment returned',r.equipment+' was returned by '+r.borrower+'.'); showToast('Return transaction recorded.');
+        addEquipNotification('Equipment returned',r.equipment+' was returned by '+r.borrower+'.',{role:'Administrator'}); showToast('Return transaction recorded.');
     }
     function renderMaintenance() {
         const body=document.getElementById('maintenanceBody'); if(!body) return; const rows=getMaintenanceRecords(); body.innerHTML='';
@@ -2007,6 +2184,10 @@
     const _showSectionOriginal = showSection;
     showSection = function(id){_showSectionOriginal(id);if(id==='transactions')renderTransactions();if(id==='maintenance')renderMaintenance();if(id==='notifications')renderNotifications();if(id==='settings')loadSystemSettings();if(id==='dashboard')refreshDashboardStats();};
     function refreshDashboardStats(){
+        if (activeAccount && activeAccount.role === 'Faculty / Staff / Student') {
+            renderStudentDashboard();
+            return;
+        }
         const inv=getInventoryRecords().filter(x=>!x.archived), req=getBorrowingRequests();
         const counts={total:inv.length,available:inv.filter(x=>x.status==='Available').length,borrowed:inv.filter(x=>x.status==='Borrowed').length,overdue:req.filter(x=>x.status==='Overdue').length};
         [['totalCount',counts.total],['availableCount',counts.available],['borrowedCount',counts.borrowed],['overdueCount',counts.overdue]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
